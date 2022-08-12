@@ -34,12 +34,12 @@ namespace PhysicsEngine
             timeResolution = pTimeResolution;
         }
 
-        public Engine(double pTimeSpan, double pDeltaTime, List<Body> pBodies) : this(pTimeSpan, pDeltaTime)
+        public Engine(double pTimeSpan, double timeResolution, List<Body> pBodies) : this(pTimeSpan, timeResolution)
         {
             bodies.AddRange(pBodies);
         }
 
-        public Engine(double pTimeSpan, double pDeltaTime, Body pBody) : this(pTimeSpan, pDeltaTime)
+        public Engine(double pTimeSpan, double timeResolution, Body pBody) : this(pTimeSpan, timeResolution)
         {
             bodies.Add(pBody);
         }
@@ -52,29 +52,42 @@ namespace PhysicsEngine
         /// <param name="pPrint"></param>
         public void Run()
         {
-            double simulationTime = timeResolution;
-
-            while (simulationTime <= timeSpan)
+            Console.WriteLine("Running simulation... ");
+            using (var progress = new ProgressBar())
             {
-                timeSamples.Add(simulationTime);
+                double simulationTime = timeResolution;
 
-                foreach (Body body in bodies)
+                while (simulationTime <= timeSpan)
                 {
-                    if (body.IsFixed)
-                    {
-                        body.UpdateTrajectory(simulationTime);
-                    }
-                    else
-                    {
-                        Vector3 netForce = EvaluateNetForceOn(body);
-                        body.CurrentPosition += timeResolution * body.CurrentVelocity + Convert.ToSingle(0.5F * Math.Pow(timeResolution, 2) / body.Mass) * netForce;
-                        body.CurrentVelocity += timeResolution / body.Mass * netForce;
-                        body.UpdateTrajectory(simulationTime);
-                    }
-                }
+                    timeSamples.Add(simulationTime);
 
-                simulationTime += timeResolution;
+                    foreach (Body body in bodies)
+                    {
+                        if (body.IsFixed)
+                        {
+                            body.UpdateTrajectory(simulationTime);
+                        }
+                        else
+                        {
+                            body.CurrentPosition += timeResolution * body.CurrentVelocity;
+
+                            if (body.Mass != 0)
+                            {
+                                Vector3 netForce = EvaluateNetForceOn(body);
+                                body.CurrentPosition += Convert.ToSingle(0.5F * Math.Pow(timeResolution, 2) / body.Mass) * netForce;
+                                body.CurrentVelocity += timeResolution / body.Mass * netForce;
+                            }
+            
+                            body.UpdateTrajectory(simulationTime);
+                        }
+                    }
+
+                    progress.Report(simulationTime / timeSpan);
+                    simulationTime += timeResolution;
+                }
             }
+
+            Console.WriteLine("\nDone. Starting plotting script...");
         }
 
         Vector3 EvaluateNetForceOn(Body pBody)
@@ -146,6 +159,34 @@ namespace PhysicsEngine
         {
             pStringBuilder.Remove(pStringBuilder.Length - pDelimiter.Length, pDelimiter.Length);
             pStringBuilder.Append('\n');
+        }
+
+        void PrintProgressBar(double pSimulationTime, double pTimeSpan)
+        {
+            double progressPercent = 100 * pSimulationTime / pTimeSpan;
+            StringBuilder bar = new();
+
+            for (int i = 0; i < progressPercent/10; i++)
+            {
+                bar.Append('=');
+            }
+
+            bar.Append('>');
+
+            for (int i = bar.Length; i < 10; i++)
+            {
+                bar.Append(' ');
+            }
+
+            ClearCurrentConsoleLine();
+            Console.Write("[" + bar.ToString() + "]");
+        }
+        static void ClearCurrentConsoleLine()
+        {
+            int currentLineCursor = Console.CursorTop;
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write(new string(' ', Console.WindowWidth));
+            Console.SetCursorPosition(0, currentLineCursor);
         }
     }
 }

@@ -40,7 +40,7 @@ namespace PhysicsEngine
             isFixed = pIsFixed;
             name = pName;
 
-            trajectory.Add(new TrajectoryPoint(0, pInitialPosition.X, pInitialPosition.Z, pInitialPosition.Z));
+            trajectory.Add(new TrajectoryPoint(0, pInitialPosition.X, pInitialPosition.Y, pInitialPosition.Z));
         }
 
         public Body(double pMass, Vector3 pInitialVelocity, Vector3 pInitialPosition, bool pIsMassive, bool pIsFixed)
@@ -71,7 +71,7 @@ namespace PhysicsEngine
             {
                 double squareDistance = Vector3.DistanceSquared(CurrentPosition, pBody.CurrentPosition);
                 double magnitude = -PhysicalConstants.G * mass * pBody.Mass / squareDistance;
-                Vector3 direction = Vector3.Normalize(CurrentPosition - pBody.CurrentPosition);
+                Vector3 direction = (-1) * Vector3.Normalize(CurrentPosition - pBody.CurrentPosition);
                 return magnitude * direction;
             }
             else
