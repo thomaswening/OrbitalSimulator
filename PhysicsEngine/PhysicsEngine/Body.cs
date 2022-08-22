@@ -60,6 +60,8 @@ namespace PhysicsEngine
 
         public void AppendPointToTrajectory(TrajectoryPoint pPoint) => trajectory.Add(pPoint);
 
+        public Vector3 LastPosition => trajectory[^2].ToVector3();                
+
         /// <summary>
         /// Evaluates the graviational force this body exerts on another body.
         /// </summary>

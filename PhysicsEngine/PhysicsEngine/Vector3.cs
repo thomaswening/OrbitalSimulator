@@ -90,6 +90,11 @@ namespace PhysicsEngine
             return new Vector3(scalar * vector.X, scalar * vector.Y, scalar * vector.Z);
         }
 
+        public static Vector3 Divide(Vector3 vector, double scalar)
+        {
+            return new Vector3(vector.X / scalar, vector.Y / scalar, vector.Z / scalar);
+        }
+
         public static double DistanceSquared(Vector3 left, Vector3 right)
         {
             Vector3 difference = Subtract(left, right);
@@ -112,5 +117,7 @@ namespace PhysicsEngine
         public static Vector3 operator -(Vector3 left, Vector3 right) => Subtract(left, right);
         public static double operator *(Vector3 left, Vector3 right) => Multiply(left, right);
         public static Vector3 operator *(double scalar, Vector3 vector) => Multiply(scalar, vector);
+        public static Vector3 operator *(Vector3 vector, double scalar) => Multiply(scalar, vector);
+        public static Vector3 operator /(Vector3 vector, double scalar) => Divide(vector, scalar);
     }
 }

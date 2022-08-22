@@ -45,5 +45,7 @@ namespace PhysicsEngine
                 Components[i] = vector.Components[i - 1];
             }
         }
+
+        public Vector3 ToVector3() => new Vector3(Components[1], Components[2], Components[3]);
     }
 }
