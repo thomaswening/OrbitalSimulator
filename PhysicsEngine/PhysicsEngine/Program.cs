@@ -130,16 +130,23 @@ namespace PhysicsEngine
                 );
             simulationBodies.Add(neptune);
 
+
             double timeSpan = 1 * 365 * 24 * Math.Pow(60, 2);
             double timeResolution = Math.Pow(60, 2);
+            //double timeResolution = 60;
 
-            Engine simulation = new(timeSpan, timeResolution, simulationBodies);
-            Clock runtimeClock = new(simulation.Run);
+            Console.WriteLine("Async\n");
+            Engine simulationAsync = new(timeSpan, timeResolution, simulationBodies);
+            Clock runtimeClockAsync = new(simulationAsync.RunAsync);
+
+            //Console.WriteLine("Sync\n");
+            //Engine simulation = new(timeSpan, timeResolution, simulationBodies);
+            //Clock runtimeClock = new(simulation.Run);
 
             //simulation.PrintToScreen();
-            simulation.PrintToFile();
+            simulationAsync.PrintToFile();
 
-            MakePlot();
+            //MakePlot();
         }
 
         public static void MakePlot()

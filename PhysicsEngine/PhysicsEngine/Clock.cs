@@ -21,6 +21,14 @@ namespace PhysicsEngine
 
         #endregion Fields
 
+        public Clock(Func<Task> pMethodAsync)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            pMethodAsync().Wait();
+            elapsedSeconds = stopwatch.ElapsedMilliseconds / 1000.0;
+            Console.WriteLine($"\nElapsed runtime >>> {ToString(elapsedSeconds)} ({elapsedSeconds} s)");
+        }
+
         public Clock(Action pMethod)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
