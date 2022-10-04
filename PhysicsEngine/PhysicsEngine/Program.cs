@@ -136,7 +136,7 @@ namespace PhysicsEngine
             //double timeResolution = 60;
 
             Engine simulation = new(timeSpan, timeResolution, simulationBodies);
-            await simulation.RunAsync();
+            Clock runtimeClock = new(simulation.RunAsync);
 
             //simulation.PrintToScreen();
             simulation.PrintToFile();
