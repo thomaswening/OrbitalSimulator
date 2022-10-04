@@ -71,6 +71,27 @@ namespace PhysicsEngine
             Console.WriteLine("\nDone. Starting plotting script...");
         }
 
+        public void Run()
+        {
+            Console.WriteLine("Running simulation... ");
+            using (var progress = new ProgressBar())
+            {
+                double simulationTime = timeResolution;
+
+                while (simulationTime <= timeSpan)
+                {
+                    timeSamples.Add(simulationTime);
+                    ProceedOneStep(simulationTime == timeResolution);
+
+                    Update(simulationTime);
+                    progress.Report(simulationTime / timeSpan);
+                    simulationTime += timeResolution;
+                }
+            }
+
+            Console.WriteLine("\nDone. Starting plotting script...");
+        }
+
         async Task ProceedOneStepAsync(bool pIsFirstStep)
         {
             List<Task> calculateNextPositionTasks = new();
@@ -80,6 +101,27 @@ namespace PhysicsEngine
             }
 
             await Task.WhenAll(calculateNextPositionTasks);
+        }
+
+        void ProceedOneStep(bool pIsFirstStep)
+        {
+            foreach (Body body in bodies)
+            {
+                if (!body.IsFixed)
+                {
+                    if (body.Mass == 0.0)
+                    {
+                        body.NextPosition = timeResolution * body.CurrentVelocity;
+                    }
+                    else
+                    {
+                        body.CurrentAcceleration = EvaluateNetForceOn(body) / body.Mass;
+                        body.CurrentPotentialEnergy = EvaluatePotentialOf(body);
+
+                        Integrator.Integrate(IntegrationType.LeapFrog, body, timeResolution, pIsFirstStep);
+                    }
+                }
+            }
         }
 
         private async Task CalculateNextPositionAsync(bool pIsFirstStep, Body body)
@@ -117,6 +159,14 @@ namespace PhysicsEngine
             await Task.WhenAll(updateTrajectoryTask);
         }
 
+        void Update(double pSimulationTime)
+        {
+            foreach (Body body in this.bodies)
+            {
+                body.UpdateTrajectory(pSimulationTime);
+            }
+        }
+
         async Task<Vector3> EvaluateNetForceOnAsync(Body pBody)
         {
             Vector3 netForce = Vector3.Zero;
@@ -134,6 +184,21 @@ namespace PhysicsEngine
             return netForce;
         }
 
+        Vector3 EvaluateNetForceOn(Body pBody)
+        {
+            Vector3 netForce = Vector3.Zero;
+
+            foreach (Body body in bodies)
+            {
+                if (body.IsMassive && body != pBody)
+                {
+                    netForce += body.GetForceOn(pBody);
+                }
+            }
+
+            return netForce;
+        }
+
         async Task<double> EvaluatePotentialOfAsync(Body pBody)
         {
             double potential = 0;
@@ -148,6 +213,21 @@ namespace PhysicsEngine
             }
 
             await Task.WhenAll(sumPotentialContributionsTasks);
+            return potential;
+        }
+
+        double EvaluatePotentialOf(Body pBody)
+        {
+            double potential = 0;
+
+            foreach (Body body in bodies)
+            {
+                if (body.IsMassive && body != pBody)
+                {
+                    potential += (-1) * body.GetForceOn(pBody).Length * Vector3.Distance(body.CurrentPosition, pBody.CurrentPosition);
+                }
+            }
+
             return potential;
         }
 

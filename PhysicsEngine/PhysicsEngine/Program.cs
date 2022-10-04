@@ -6,7 +6,7 @@ namespace PhysicsEngine
 {
     internal class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             List<Body> simulationBodies = new List<Body>();
 
@@ -135,13 +135,18 @@ namespace PhysicsEngine
             double timeResolution = Math.Pow(60, 2);
             //double timeResolution = 60;
 
-            Engine simulation = new(timeSpan, timeResolution, simulationBodies);
-            Clock runtimeClock = new(simulation.RunAsync);
+            Console.WriteLine("Async\n");
+            Engine simulationAsync = new(timeSpan, timeResolution, simulationBodies);
+            Clock runtimeClockAsync = new(simulationAsync.RunAsync);
+
+            //Console.WriteLine("Sync\n");
+            //Engine simulation = new(timeSpan, timeResolution, simulationBodies);
+            //Clock runtimeClock = new(simulation.Run);
 
             //simulation.PrintToScreen();
-            simulation.PrintToFile();
+            simulationAsync.PrintToFile();
 
-            MakePlot();
+            //MakePlot();
         }
 
         public static void MakePlot()
