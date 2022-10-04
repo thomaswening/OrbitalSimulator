@@ -50,33 +50,19 @@ namespace PhysicsEngine
         /// Runs the simulation and updates the bodies' trajectory along the way.
         /// </summary>
         /// <param name="pPrint"></param>
-        public void Run()
+        public async Task RunAsync()
         {
             Console.WriteLine("Running simulation... ");
             using (var progress = new ProgressBar())
             {
                 double simulationTime = timeResolution;
-                Vector3 netForce;
 
                 while (simulationTime <= timeSpan)
                 {
                     timeSamples.Add(simulationTime);
+                    await ProceedOneStepAsync(simulationTime == timeResolution);
 
-                    foreach (Body body in bodies)
-                    {
-                        if (body.IsFixed)
-                        {
-                            body.UpdateTrajectory(simulationTime);
-                        }
-                        else
-                        {
-                            VerletIntegrate(body, simulationTime == timeResolution);
-                            //LeapFrogIntegrate(body, simulationTime == timeResolution);
-                            //EulerIntegrate(body);
-                            body.UpdateTrajectory(simulationTime);
-                        }
-                    }
-
+                    await UpdateAsync(simulationTime);
                     progress.Report(simulationTime / timeSpan);
                     simulationTime += timeResolution;
                 }
@@ -85,19 +71,84 @@ namespace PhysicsEngine
             Console.WriteLine("\nDone. Starting plotting script...");
         }
 
-        Vector3 EvaluateNetForceOn(Body pBody)
+        async Task ProceedOneStepAsync(bool pIsFirstStep)
+        {
+            List<Task> calculateNextPositionTasks = new();
+            foreach (Body body in bodies)
+            {
+                calculateNextPositionTasks.Add(CalculateNextPositionAsync(pIsFirstStep, body));
+            }
+
+            await Task.WhenAll(calculateNextPositionTasks);
+        }
+
+        private async Task CalculateNextPositionAsync(bool pIsFirstStep, Body body)
+        {
+            if (!body.IsFixed)
+            {
+                if (body.Mass == 0.0)
+                {
+                    body.NextPosition = timeResolution * body.CurrentVelocity;
+                }
+                else
+                {
+                    Vector3 netForce;
+                    Task<Vector3> netForceTask = EvaluateNetForceOnAsync(body);
+                    Task<double> potentialTask = EvaluatePotentialOfAsync(body);
+
+                    netForce = await netForceTask;
+                    body.CurrentAcceleration = netForce / body.Mass;
+                    body.CurrentPotentialEnergy = await potentialTask;
+
+                    Integrator.Integrate(IntegrationType.LeapFrog, body, timeResolution, pIsFirstStep);
+                }
+            }
+        }
+
+        async Task UpdateAsync(double pSimulationTime)
+        {
+            List<Task> updateTrajectoryTask = new();
+
+            foreach (Body body in this.bodies)
+            {
+                updateTrajectoryTask.Add(Task.Run(() => body.UpdateTrajectory(pSimulationTime)));
+            }
+
+            await Task.WhenAll(updateTrajectoryTask);
+        }
+
+        async Task<Vector3> EvaluateNetForceOnAsync(Body pBody)
         {
             Vector3 netForce = Vector3.Zero;
+            List<Task> sumForceContributionsTasks = new();
 
             foreach (Body body in bodies)
             {
                 if (body.IsMassive && body != pBody)
                 {
-                    netForce += body.GetForceOn(pBody);
+                    sumForceContributionsTasks.Add(Task.Run(() => netForce += body.GetForceOn(pBody)));
                 }
             }
 
+            await Task.WhenAll(sumForceContributionsTasks);
             return netForce;
+        }
+
+        async Task<double> EvaluatePotentialOfAsync(Body pBody)
+        {
+            double potential = 0;
+            List<Task> sumPotentialContributionsTasks = new();
+
+            foreach (Body body in bodies)
+            {
+                if (body.IsMassive && body != pBody)
+                {
+                    sumPotentialContributionsTasks.Add(Task.Run(() => potential += (-1) * body.GetForceOn(pBody).Length * Vector3.Distance(body.CurrentPosition, pBody.CurrentPosition)));
+                }
+            }
+
+            await Task.WhenAll(sumPotentialContributionsTasks);
+            return potential;
         }
 
         public string ToString(string pDelimiter = ",")
@@ -183,69 +234,5 @@ namespace PhysicsEngine
             Console.Write(new string(' ', Console.WindowWidth));
             Console.SetCursorPosition(0, currentLineCursor);
         }
-
-        void EulerIntegrate(Body pBody)
-        {
-            pBody.CurrentPosition += timeResolution * pBody.CurrentVelocity;
-
-            if (pBody.Mass != 0.0)
-            {
-                Vector3 netForce = this.EvaluateNetForceOn(pBody);
-                pBody.CurrentPosition += 0.5 * Math.Pow(timeResolution, 2) / pBody.Mass * netForce;
-                pBody.CurrentVelocity += timeResolution / pBody.Mass * netForce;
-            }    
-        }
-
-        void LeapFrogIntegrate(Body pBody, bool pIsFirstStep)
-        {
-            if (pBody.Mass == 0)
-            {
-                pBody.CurrentPosition = timeResolution * pBody.CurrentVelocity;
-            }
-            else
-            {
-                Vector3 acceleration = EvaluateNetForceOn(pBody) / pBody.Mass;
-
-                // In the first step we want to calculate the next position from the current velocity,
-                // which however is still simultaneous with the current position, so we use Euler for the position
-                // and then calculate the next velocity half a time step ahead
-
-                if (pIsFirstStep)
-                {
-                    pBody.CurrentPosition += 0.5 * Math.Pow(timeResolution, 2) * acceleration + timeResolution * pBody.CurrentVelocity;
-                    pBody.CurrentVelocity += timeResolution / 2.0 * acceleration;                    
-                }
-                else
-                {
-                    pBody.CurrentVelocity += acceleration * timeResolution;
-                    pBody.CurrentPosition += pBody.CurrentVelocity * timeResolution;
-                }
-            }
-        }
-
-        void VerletIntegrate(Body pBody, bool pIsFirstStep)
-        {
-            if (pBody.Mass == 0)
-            {
-                pBody.CurrentPosition = timeResolution * pBody.CurrentVelocity;
-            }
-            else
-            {
-                Vector3 acceleration = EvaluateNetForceOn(pBody) / pBody.Mass;
-
-                // Verlet integration only works with two previous positions already known,
-                // so we use naive integration for the first time step
-
-                if (pIsFirstStep)
-                {
-                    pBody.CurrentPosition += 0.5 * Math.Pow(timeResolution, 2) * acceleration + timeResolution * pBody.CurrentVelocity;
-                }
-                else
-                {
-                    pBody.CurrentPosition = 2.0 * pBody.CurrentPosition - pBody.LastPosition + acceleration * Math.Pow(timeResolution, 2);
-                }
-            }
-        }
-
     }
 }

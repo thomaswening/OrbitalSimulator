@@ -11,23 +11,36 @@ namespace PhysicsEngine
     /// </summary>
     internal class Body
     {
-        int numberOfUnnamedBodies = 0;
-        double mass = 0;
+        #region Fields
 
-        string name;
-        bool isMassive;
-        bool isFixed;
+        static int numberOfUnnamedBodies = 0;
 
-        List<TrajectoryPoint> trajectory = new List<TrajectoryPoint>();
+        readonly bool isFixed;
+        readonly bool isMassive;
+        readonly double mass = 0;
+        readonly string name;
+        readonly List<TrajectoryPoint> trajectory = new();
 
+        #endregion Fields
+
+        #region Properties
+
+        public Vector3 CurrentAcceleration { get; set; } = Vector3.Zero;
+        public Vector3 CurrentPosition { get; set; }
+        public double CurrentPotentialEnergy { get; internal set; } = 0.0;
+        public Vector3 CurrentVelocity { get; set; }
+        public bool IsFixed => isFixed;
+        public bool IsMassive => isMassive;
+        public double KineticEnergy => 0.5 * mass * CurrentVelocity.LengthSquared;
+        public Vector3 LastPosition => trajectory[^2].ToVector3();
         public double Mass => mass;
         public string Name => name;
-        public Vector3 CurrentVelocity { get; set; }
-        public Vector3 CurrentPosition { get; set; }
+        public Vector3 NextPosition { get; set; } = Vector3.Zero;
         public List<TrajectoryPoint> Trajectory => trajectory;
 
-        public bool IsMassive => isMassive;
-        public bool IsFixed => isFixed;
+        #endregion Properties
+
+        #region Constructors
 
         public Body(double pMass, Vector3 pInitialVelocity, Vector3 pInitialPosition, bool pIsMassive, bool pIsFixed, string pName)
         {
@@ -58,10 +71,11 @@ namespace PhysicsEngine
             trajectory.Add(new TrajectoryPoint(0, pInitialPosition.X, pInitialPosition.Z, pInitialPosition.Z));
         }
 
+        #endregion Constructors
+
+        #region Methods
+
         public void AppendPointToTrajectory(TrajectoryPoint pPoint) => trajectory.Add(pPoint);
-
-        public Vector3 LastPosition => trajectory[^2].ToVector3();                
-
         /// <summary>
         /// Evaluates the graviational force this body exerts on another body.
         /// </summary>
@@ -84,7 +98,17 @@ namespace PhysicsEngine
 
         public void UpdateTrajectory(double pTime)
         {
-            trajectory.Add(new TrajectoryPoint(pTime, CurrentPosition));
+            if (IsFixed)
+            {
+                trajectory.Add(new TrajectoryPoint(pTime, CurrentPosition));
+            }
+            else
+            {
+                CurrentPosition = NextPosition;
+                trajectory.Add(new TrajectoryPoint(pTime, CurrentPosition));
+            }
         }
+
+        #endregion Methods
     }
 }
