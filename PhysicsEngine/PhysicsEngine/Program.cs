@@ -132,21 +132,15 @@ namespace PhysicsEngine
 
 
             double timeSpan = 1 * 365 * 24 * Math.Pow(60, 2);
-            double timeResolution = Math.Pow(60, 2);
-            //double timeResolution = 60;
+            double timeResolution = 24 * Math.Pow(60, 2);
 
-            Console.WriteLine("Async\n");
-            Engine simulationAsync = new(timeSpan, timeResolution, simulationBodies);
-            Clock runtimeClockAsync = new(simulationAsync.RunAsync);
-
-            //Console.WriteLine("Sync\n");
-            //Engine simulation = new(timeSpan, timeResolution, simulationBodies);
-            //Clock runtimeClock = new(simulation.Run);
+            Engine simulation = new(timeSpan, timeResolution, simulationBodies);
+            Clock runtimeClock = new(simulation.Run);
 
             //simulation.PrintToScreen();
-            simulationAsync.PrintToFile();
-
-            //MakePlot();
+            simulation.PrintToFile();
+            MakePlot();
+            Console.WriteLine("Plotting done!");
         }
 
         public static void MakePlot()

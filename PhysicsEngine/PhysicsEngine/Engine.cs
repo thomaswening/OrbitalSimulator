@@ -50,27 +50,6 @@ namespace PhysicsEngine
         /// Runs the simulation and updates the bodies' trajectory along the way.
         /// </summary>
         /// <param name="pPrint"></param>
-        public async Task RunAsync()
-        {
-            Console.WriteLine("Running simulation... ");
-            using (var progress = new ProgressBar())
-            {
-                double simulationTime = timeResolution;
-
-                while (simulationTime <= timeSpan)
-                {
-                    timeSamples.Add(simulationTime);
-                    await ProceedOneStepAsync(simulationTime == timeResolution);
-
-                    await UpdateAsync(simulationTime);
-                    progress.Report(simulationTime / timeSpan);
-                    simulationTime += timeResolution;
-                }
-            }
-
-            Console.WriteLine("\nDone. Starting plotting script...");
-        }
-
         public void Run()
         {
             Console.WriteLine("Running simulation... ");
@@ -92,71 +71,30 @@ namespace PhysicsEngine
             Console.WriteLine("\nDone. Starting plotting script...");
         }
 
-        async Task ProceedOneStepAsync(bool pIsFirstStep)
-        {
-            List<Task> calculateNextPositionTasks = new();
-            foreach (Body body in bodies)
-            {
-                calculateNextPositionTasks.Add(CalculateNextPositionAsync(pIsFirstStep, body));
-            }
-
-            await Task.WhenAll(calculateNextPositionTasks);
-        }
-
         void ProceedOneStep(bool pIsFirstStep)
         {
             foreach (Body body in bodies)
             {
                 if (!body.IsFixed)
                 {
-                    if (body.Mass == 0.0)
-                    {
-                        body.NextPosition = timeResolution * body.CurrentVelocity;
-                    }
-                    else
-                    {
-                        body.CurrentAcceleration = EvaluateNetForceOn(body) / body.Mass;
-                        body.CurrentPotentialEnergy = EvaluatePotentialOf(body);
-
-                        Integrator.Integrate(IntegrationType.LeapFrog, body, timeResolution, pIsFirstStep);
-                    }
+                    CalculateNextPosition(pIsFirstStep, body);
                 }
             }
         }
 
-        private async Task CalculateNextPositionAsync(bool pIsFirstStep, Body body)
+        private void CalculateNextPosition(bool pIsFirstStep, Body body)
         {
-            if (!body.IsFixed)
+            if (body.Mass == 0.0)
             {
-                if (body.Mass == 0.0)
-                {
-                    body.NextPosition = timeResolution * body.CurrentVelocity;
-                }
-                else
-                {
-                    Vector3 netForce;
-                    Task<Vector3> netForceTask = EvaluateNetForceOnAsync(body);
-                    Task<double> potentialTask = EvaluatePotentialOfAsync(body);
-
-                    netForce = await netForceTask;
-                    body.CurrentAcceleration = netForce / body.Mass;
-                    body.CurrentPotentialEnergy = await potentialTask;
-
-                    Integrator.Integrate(IntegrationType.LeapFrog, body, timeResolution, pIsFirstStep);
-                }
+                body.NextPosition = timeResolution * body.CurrentVelocity;
             }
-        }
-
-        async Task UpdateAsync(double pSimulationTime)
-        {
-            List<Task> updateTrajectoryTask = new();
-
-            foreach (Body body in this.bodies)
+            else
             {
-                updateTrajectoryTask.Add(Task.Run(() => body.UpdateTrajectory(pSimulationTime)));
-            }
+                body.CurrentAcceleration = EvaluateNetForceOn(body) / body.Mass;
+                body.CurrentPotentialEnergy = EvaluatePotentialOf(body);
 
-            await Task.WhenAll(updateTrajectoryTask);
+                Integrator.Integrate(IntegrationType.LeapFrog, body, timeResolution, pIsFirstStep);
+            }
         }
 
         void Update(double pSimulationTime)
@@ -165,23 +103,6 @@ namespace PhysicsEngine
             {
                 body.UpdateTrajectory(pSimulationTime);
             }
-        }
-
-        async Task<Vector3> EvaluateNetForceOnAsync(Body pBody)
-        {
-            Vector3 netForce = Vector3.Zero;
-            List<Task> sumForceContributionsTasks = new();
-
-            foreach (Body body in bodies)
-            {
-                if (body.IsMassive && body != pBody)
-                {
-                    sumForceContributionsTasks.Add(Task.Run(() => netForce += body.GetForceOn(pBody)));
-                }
-            }
-
-            await Task.WhenAll(sumForceContributionsTasks);
-            return netForce;
         }
 
         Vector3 EvaluateNetForceOn(Body pBody)
@@ -197,23 +118,6 @@ namespace PhysicsEngine
             }
 
             return netForce;
-        }
-
-        async Task<double> EvaluatePotentialOfAsync(Body pBody)
-        {
-            double potential = 0;
-            List<Task> sumPotentialContributionsTasks = new();
-
-            foreach (Body body in bodies)
-            {
-                if (body.IsMassive && body != pBody)
-                {
-                    sumPotentialContributionsTasks.Add(Task.Run(() => potential += (-1) * body.GetForceOn(pBody).Length * Vector3.Distance(body.CurrentPosition, pBody.CurrentPosition)));
-                }
-            }
-
-            await Task.WhenAll(sumPotentialContributionsTasks);
-            return potential;
         }
 
         double EvaluatePotentialOf(Body pBody)
@@ -285,34 +189,6 @@ namespace PhysicsEngine
         {
             pStringBuilder.Remove(pStringBuilder.Length - pDelimiter.Length, pDelimiter.Length);
             pStringBuilder.Append('\n');
-        }
-
-        void PrintProgressBar(double pSimulationTime, double pTimeSpan)
-        {
-            double progressPercent = 100 * pSimulationTime / pTimeSpan;
-            StringBuilder bar = new();
-
-            for (int i = 0; i < progressPercent/10; i++)
-            {
-                bar.Append('=');
-            }
-
-            bar.Append('>');
-
-            for (int i = bar.Length; i < 10; i++)
-            {
-                bar.Append(' ');
-            }
-
-            ClearCurrentConsoleLine();
-            Console.Write("[" + bar.ToString() + "]");
-        }
-        static void ClearCurrentConsoleLine()
-        {
-            int currentLineCursor = Console.CursorTop;
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Console.Write(new string(' ', Console.WindowWidth));
-            Console.SetCursorPosition(0, currentLineCursor);
         }
     }
 }

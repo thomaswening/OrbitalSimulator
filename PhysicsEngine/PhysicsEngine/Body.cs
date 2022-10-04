@@ -109,6 +109,8 @@ namespace PhysicsEngine
             }
         }
 
+        public void ClearTrajectory() => trajectory.RemoveRange(1, trajectory.Count - 2);
+
         #endregion Methods
     }
 }
