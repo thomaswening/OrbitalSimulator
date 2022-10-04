@@ -70,8 +70,8 @@ namespace PhysicsEngine
                         }
                         else
                         {
-                            VerletIntegrate(body, simulationTime == timeResolution);
-                            //LeapFrogIntegrate(body, simulationTime == timeResolution);
+                            //VerletIntegrate(body, simulationTime == timeResolution);
+                            LeapFrogIntegrate(body, simulationTime == timeResolution);
                             //EulerIntegrate(body);
                             body.UpdateTrajectory(simulationTime);
                         }
