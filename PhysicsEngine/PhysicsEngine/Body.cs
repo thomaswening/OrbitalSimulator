@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,21 +15,26 @@ namespace PhysicsEngine
     {
         #region Fields
 
-        static int numberOfUnnamedBodies = 0;
+        static int numberOfUnnamedBodies;
+        static int numberOfBodies;
+        static int numberOfMassiveBodies;
 
-        readonly bool isFixed;
-        readonly bool isMassive;
-        readonly double mass = 0;
-        readonly string name;
         readonly List<TrajectoryPoint> trajectory = new();
+
+        int cacheId;
+        bool isFixed;
+        bool isMassive;
+        double mass;
+        string name;        
 
         #endregion Fields
 
         #region Properties
 
+        public int CacheId => cacheId;
         public Vector3 CurrentAcceleration { get; set; } = Vector3.Zero;
         public Vector3 CurrentPosition { get; set; }
-        public double CurrentPotentialEnergy { get; internal set; } = 0.0;
+        public double CurrentPotentialEnergy { get; set; } = 0.0;
         public Vector3 CurrentVelocity { get; set; }
         public bool IsFixed => isFixed;
         public bool IsMassive => isMassive;
@@ -44,36 +51,42 @@ namespace PhysicsEngine
 
         public Body(double pMass, Vector3 pInitialVelocity, Vector3 pInitialPosition, bool pIsMassive, bool pIsFixed, string pName)
         {
-            CurrentVelocity = pInitialVelocity;
+            Initialize(pMass, pInitialVelocity, pInitialPosition, pIsMassive, pIsFixed);
 
-            CurrentPosition = pInitialPosition;
-
-            mass = pMass;
-            isMassive = pIsMassive;
-            isFixed = pIsFixed;
             name = pName;
-
-            trajectory.Add(new TrajectoryPoint(0, pInitialPosition.X, pInitialPosition.Y, pInitialPosition.Z));
         }
 
         public Body(double pMass, Vector3 pInitialVelocity, Vector3 pInitialPosition, bool pIsMassive, bool pIsFixed)
         {
+            Initialize(pMass, pInitialVelocity, pInitialPosition, pIsMassive, pIsFixed);
+
             numberOfUnnamedBodies++;
-            CurrentVelocity = pInitialVelocity;
-
-            CurrentPosition = pInitialPosition;
-
-            mass = pMass;
-            isMassive = pIsMassive;
-            isFixed = pIsFixed;
             name = "Object" + numberOfUnnamedBodies;
-
-            trajectory.Add(new TrajectoryPoint(0, pInitialPosition.X, pInitialPosition.Z, pInitialPosition.Z));
         }
 
         #endregion Constructors
 
         #region Methods
+
+        [MemberNotNull(nameof(CurrentVelocity), nameof(CurrentPosition))]
+        public void Initialize(double pMass, Vector3 pInitialVelocity, Vector3 pInitialPosition, bool pIsMassive, bool pIsFixed)
+        {
+            numberOfBodies++;
+            CurrentVelocity = pInitialVelocity;
+            CurrentPosition = pInitialPosition;
+
+            mass = pMass;
+            isMassive = pIsMassive;
+            isFixed = pIsFixed;
+
+            if (isMassive)
+            {
+                cacheId = numberOfMassiveBodies;
+                numberOfMassiveBodies++;
+            }
+
+            trajectory.Add(new TrajectoryPoint(0, pInitialPosition.X, pInitialPosition.Y, pInitialPosition.Z));
+        }
 
         public void AppendPointToTrajectory(TrajectoryPoint pPoint) => trajectory.Add(pPoint);
         /// <summary>
