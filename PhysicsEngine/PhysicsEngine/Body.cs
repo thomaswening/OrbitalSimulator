@@ -86,7 +86,7 @@ namespace PhysicsEngine
             if (isMassive)
             {
                 double squareDistance = Vector3.DistanceSquared(CurrentPosition, pBody.CurrentPosition);
-                double magnitude = -PhysicalConstants.G * mass * pBody.Mass / squareDistance;
+                double magnitude = (-1) * PhysicalConstants.G * mass * pBody.Mass / squareDistance;
                 Vector3 direction = (-1) * Vector3.Normalize(CurrentPosition - pBody.CurrentPosition);
                 return magnitude * direction;
             }

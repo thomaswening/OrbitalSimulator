@@ -34,12 +34,12 @@ namespace PhysicsEngine
             timeResolution = pTimeResolution;
         }
 
-        public Engine(double pTimeSpan, double timeResolution, List<Body> pBodies) : this(pTimeSpan, timeResolution)
+        public Engine(double pTimeSpan, double pTimeResolution, List<Body> pBodies) : this(pTimeSpan, pTimeResolution)
         {
             bodies.AddRange(pBodies);
         }
 
-        public Engine(double pTimeSpan, double timeResolution, Body pBody) : this(pTimeSpan, timeResolution)
+        public Engine(double pTimeSpan, double pTimeResolution, Body pBody) : this(pTimeSpan, pTimeResolution)
         {
             bodies.Add(pBody);
         }
@@ -49,7 +49,6 @@ namespace PhysicsEngine
         /// <summary>
         /// Runs the simulation and updates the bodies' trajectory along the way.
         /// </summary>
-        /// <param name="pPrint"></param>
         public void Run()
         {
             Console.WriteLine("Running simulation... ");
@@ -82,18 +81,18 @@ namespace PhysicsEngine
             }
         }
 
-        private void CalculateNextPosition(bool pIsFirstStep, Body body)
+        private void CalculateNextPosition(bool pIsFirstStep, Body pBody)
         {
-            if (body.Mass == 0.0)
+            if (pBody.Mass == 0.0)
             {
-                body.NextPosition = timeResolution * body.CurrentVelocity;
+                pBody.NextPosition = timeResolution * pBody.CurrentVelocity;
             }
             else
             {
-                body.CurrentAcceleration = EvaluateNetForceOn(body) / body.Mass;
-                body.CurrentPotentialEnergy = EvaluatePotentialOf(body);
+                pBody.CurrentAcceleration = EvaluateNetForceOn(pBody) / pBody.Mass;
+                pBody.CurrentPotentialEnergy = EvaluatePotentialOf(pBody);
 
-                Integrator.Integrate(IntegrationType.LeapFrog, body, timeResolution, pIsFirstStep);
+                Integrator.Integrate(IntegrationType.LeapFrog, pBody, timeResolution, pIsFirstStep);
             }
         }
 
