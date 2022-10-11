@@ -30,8 +30,8 @@ namespace PhysicsEngine
         #endregion Fields
 
         #region Properties
-
-        public int CacheId => cacheId;
+        static public int NumberOfMassiveBodies => numberOfMassiveBodies;
+        public int CacheId => cacheId;        
         public Vector3 CurrentAcceleration { get; set; } = Vector3.Zero;
         public Vector3 CurrentPosition { get; set; }
         public double CurrentPotentialEnergy { get; set; } = 0.0;
@@ -89,6 +89,7 @@ namespace PhysicsEngine
         }
 
         public void AppendPointToTrajectory(TrajectoryPoint pPoint) => trajectory.Add(pPoint);
+
         /// <summary>
         /// Evaluates the graviational force this body exerts on another body.
         /// </summary>
@@ -99,8 +100,8 @@ namespace PhysicsEngine
             if (isMassive)
             {
                 double squareDistance = Vector3.DistanceSquared(CurrentPosition, pBody.CurrentPosition);
-                double magnitude = (-1) * PhysicalConstants.G * mass * pBody.Mass / squareDistance;
-                Vector3 direction = (-1) * Vector3.Normalize(CurrentPosition - pBody.CurrentPosition);
+                double magnitude = PhysicalConstants.G * mass * pBody.Mass / squareDistance;
+                Vector3 direction = Vector3.Normalize(CurrentPosition - pBody.CurrentPosition);
                 return magnitude * direction;
             }
             else

@@ -11,24 +11,18 @@ namespace PhysicsEngine
     /// </summary>
     internal class Engine
     {
-        List<Body> bodies = new List<Body>();
-        double timeSpan;
-        double timeResolution;
-        List<double> timeSamples = new List<double> { 0 };
+        readonly List<Body> bodies = new();
+        readonly double timeSpan;
+        readonly double timeResolution;
+        readonly List<double> timeSamples = new() { 0 };
+
+        ForceCache? forceCache;
 
         public Engine(double pTimeSpan, double pTimeResolution)
         {
-            if (pTimeSpan < 0)
-            {
-                Console.WriteLine("The time span must be greater than zero.");
-                return;
-            }
+            if (pTimeSpan < 0) new ArgumentException("The time span must be greater than zero.", nameof(pTimeSpan));
 
-            if (pTimeSpan < pTimeResolution)
-            {
-                Console.WriteLine("The time span must be greater than the time resolution.");
-                return;
-            }
+            if (pTimeSpan < pTimeResolution) new ArgumentException("The time span must be greater than the time resolution.", nameof(pTimeResolution));
 
             timeSpan = pTimeSpan;
             timeResolution = pTimeResolution;
@@ -39,11 +33,6 @@ namespace PhysicsEngine
             bodies.AddRange(pBodies);
         }
 
-        public Engine(double pTimeSpan, double pTimeResolution, Body pBody) : this(pTimeSpan, pTimeResolution)
-        {
-            bodies.Add(pBody);
-        }
-
         public void AddBody(Body pBody) => bodies.Add(pBody);
 
         /// <summary>
@@ -51,6 +40,8 @@ namespace PhysicsEngine
         /// </summary>
         public void Run()
         {
+            forceCache = new ForceCache(Body.NumberOfMassiveBodies);
+
             Console.WriteLine("Running simulation... ");
             using (var progress = new ProgressBar())
             {
@@ -112,11 +103,25 @@ namespace PhysicsEngine
             {
                 if (body.IsMassive && body != pBody)
                 {
-                    netForce += body.GetForceOn(pBody);
+                    Vector3 cachedForce = GetForceBodyBOnA(pBody, body);
+                    netForce += cachedForce;
                 }
             }
 
             return netForce;
+        }
+
+        private Vector3 GetForceBodyBOnA(Body pBodyA, Body pBodyB)
+        {
+            Vector3? cachedForce = forceCache.Fetch(pBodyA.CacheId, pBodyB.CacheId);
+
+            if (cachedForce is null)
+            {
+                cachedForce = pBodyB.GetForceOn(pBodyA);
+                forceCache.Post(pBodyA.CacheId, pBodyB.CacheId, cachedForce);
+            }
+
+            return cachedForce;
         }
 
         double EvaluatePotentialOf(Body pBody)
@@ -127,7 +132,8 @@ namespace PhysicsEngine
             {
                 if (body.IsMassive && body != pBody)
                 {
-                    potential += (-1) * body.GetForceOn(pBody).Length * Vector3.Distance(body.CurrentPosition, pBody.CurrentPosition);
+                    Vector3 cachedForce = GetForceBodyBOnA(pBody, body);
+                    potential += (-1) * cachedForce.Length * Vector3.Distance(body.CurrentPosition, pBody.CurrentPosition);
                 }
             }
 

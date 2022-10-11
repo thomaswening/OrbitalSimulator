@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 namespace PhysicsEngine
 {
-    internal class Cache
+    internal class ForceCache
     {
         int dimension;
-        double?[,] grid;
+        Vector3?[,] grid;
 
-        public Cache(int pDimension)
+        public ForceCache(int pDimension)
         {
-            grid = new double?[pDimension, pDimension];
+            grid = new Vector3?[pDimension, pDimension];
         }
 
-        public double? Fetch(int i, int j)
+        public Vector3? Fetch(int i, int j)
         {
             if (i == j) throw new Exception("Diagonal elements cannot ever be fetched because they are undefined.");
 
@@ -27,9 +27,9 @@ namespace PhysicsEngine
             return grid[i, j];
         }
 
-        public void Clear() => grid = new double?[dimension, dimension];
+        public void Clear() => grid = new Vector3?[dimension, dimension];
         
-        public void Post(int i, int j, double pValue)
+        public void Post(int i, int j, Vector3 pValue)
         {
             if (i == j) throw new Exception("Diagonal elements must remain undefined.");
 

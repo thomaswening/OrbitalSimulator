@@ -132,7 +132,7 @@ namespace PhysicsEngine
 
 
             double timeSpan = 1 * 365 * 24 * Math.Pow(60, 2);
-            double timeResolution = 24 * Math.Pow(60, 2);
+            double timeResolution = Math.Pow(60, 2);
 
             Engine simulation = new(timeSpan, timeResolution, simulationBodies);
             Clock runtimeClock = new(simulation.Run);
