@@ -70,6 +70,10 @@ namespace PhysicsEngine
                     CalculateNextPosition(pIsFirstStep, body);
                 }
             }
+
+            if (forceCache is null) throw new Exception("Force cache is not initialized.");
+
+            forceCache.Clear();
         }
 
         private void CalculateNextPosition(bool pIsFirstStep, Body pBody)
@@ -113,6 +117,8 @@ namespace PhysicsEngine
 
         private Vector3 GetForceBodyBOnA(Body pBodyA, Body pBodyB)
         {
+            if (forceCache is null) throw new Exception("Force cache is not initialized.");
+
             Vector3? cachedForce = forceCache.Fetch(pBodyA.CacheId, pBodyB.CacheId);
 
             if (cachedForce is null)

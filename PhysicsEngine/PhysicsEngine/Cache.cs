@@ -8,11 +8,12 @@ namespace PhysicsEngine
 {
     internal class ForceCache
     {
-        int dimension;
+        readonly int dimension;
         Vector3?[,] grid;
 
         public ForceCache(int pDimension)
         {
+            dimension = pDimension;
             grid = new Vector3?[pDimension, pDimension];
         }
 
