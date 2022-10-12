@@ -20,9 +20,9 @@ namespace PhysicsEngine
 
         public Engine(double pTimeSpan, double pTimeResolution)
         {
-            if (pTimeSpan < 0) new ArgumentException("The time span must be greater than zero.", nameof(pTimeSpan));
+            if (pTimeSpan < 0) throw new ArgumentException("The time span must be greater than zero.", nameof(pTimeSpan));
 
-            if (pTimeSpan < pTimeResolution) new ArgumentException("The time span must be greater than the time resolution.", nameof(pTimeResolution));
+            if (pTimeSpan < pTimeResolution) throw new ArgumentException("The time span must be greater than the time resolution.", nameof(pTimeResolution));
 
             timeSpan = pTimeSpan;
             timeResolution = pTimeResolution;
@@ -63,17 +63,13 @@ namespace PhysicsEngine
 
         void ProceedOneStep(bool pIsFirstStep)
         {
+            forceCache!.Refresh(bodies);
+
             foreach (Body body in bodies)
             {
-                if (!body.IsFixed)
-                {
-                    CalculateNextPosition(pIsFirstStep, body);
-                }
+                if (!body.IsFixed) CalculateNextPosition(pIsFirstStep, body);
+                body.CurrentPotentialEnergy = body.IsMassive? EvaluatePotentialOf(body) : 0;
             }
-
-            if (forceCache is null) throw new Exception("Force cache is not initialized.");
-
-            forceCache.Clear();
         }
 
         private void CalculateNextPosition(bool pIsFirstStep, Body pBody)
@@ -85,7 +81,6 @@ namespace PhysicsEngine
             else
             {
                 pBody.CurrentAcceleration = EvaluateNetForceOn(pBody) / pBody.Mass;
-                pBody.CurrentPotentialEnergy = EvaluatePotentialOf(pBody);
 
                 Integrator.Integrate(IntegrationType.LeapFrog, pBody, timeResolution, pIsFirstStep);
             }
@@ -103,43 +98,26 @@ namespace PhysicsEngine
         {
             Vector3 netForce = Vector3.Zero;
 
-            foreach (Body body in bodies)
+            foreach (Body body2 in bodies.Where(x => x.IsMassive))
             {
-                if (body.IsMassive && body != pBody)
-                {
-                    Vector3 cachedForce = GetForceBodyBOnA(pBody, body);
-                    netForce += cachedForce;
-                }
+                if (body2 != pBody) netForce += forceCache!.Fetch(pBody, body2);
             }
 
             return netForce;
-        }
-
-        private Vector3 GetForceBodyBOnA(Body pBodyA, Body pBodyB)
-        {
-            if (forceCache is null) throw new Exception("Force cache is not initialized.");
-
-            Vector3? cachedForce = forceCache.Fetch(pBodyA.CacheId, pBodyB.CacheId);
-
-            if (cachedForce is null)
-            {
-                cachedForce = pBodyB.GetForceOn(pBodyA);
-                forceCache.Post(pBodyA.CacheId, pBodyB.CacheId, cachedForce);
-            }
-
-            return cachedForce;
         }
 
         double EvaluatePotentialOf(Body pBody)
         {
             double potential = 0;
 
-            foreach (Body body in bodies)
+            if (forceCache is null) throw new Exception($"{nameof(forceCache)} has not been initialized.");
+
+            foreach (Body body2 in bodies.Where(x => x.IsMassive))
             {
-                if (body.IsMassive && body != pBody)
+                if (body2 != pBody)
                 {
-                    Vector3 cachedForce = GetForceBodyBOnA(pBody, body);
-                    potential += (-1) * cachedForce.Length * Vector3.Distance(body.CurrentPosition, pBody.CurrentPosition);
+                    Vector3 cachedForce = forceCache.Fetch(pBody, body2);
+                    potential += (-1) * cachedForce.Length * Vector3.Distance(body2.CurrentPosition, pBody.CurrentPosition);
                 }
             }
 
@@ -166,7 +144,7 @@ namespace PhysicsEngine
             }
 
             EndLine(sb, pDelimiter);
-            sb.Append("\n");
+            sb.Append('\n');
 
             // Body
 
