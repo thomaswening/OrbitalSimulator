@@ -137,10 +137,10 @@ namespace PhysicsEngine
             Engine simulation = new(timeSpan, timeResolution, simulationBodies);
             Clock runtimeClock = new(simulation.Run);
 
-            //simulation.PrintToScreen();
+            ////simulation.PrintToScreen();
             simulation.PrintToFile();
-            MakePlot();
-            Console.WriteLine("Plotting done!");
+            //MakePlot();
+            //Console.WriteLine("Plotting done!");
         }
 
         public static void MakePlot()
