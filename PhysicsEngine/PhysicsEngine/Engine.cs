@@ -15,7 +15,7 @@ namespace PhysicsEngine
         readonly double timeSpan;
         readonly double timeResolution;
         readonly List<double> timeSamples = new() { 0 };
-
+        private readonly string dataPath = @"E:\Users\thoma\Desktop\simulation_run.txt";
         ForceCache? forceCache;
 
         public Engine(double pTimeSpan, double pTimeResolution)
@@ -170,7 +170,7 @@ namespace PhysicsEngine
 
         public void PrintToFile(string pDelimiter = ",")
         {
-            using StreamWriter file = new("E:\\Users\\thoma\\Desktop\\simulation_run.txt");
+            using StreamWriter file = new(dataPath);
             file.WriteLine(ToString());
         }
 
