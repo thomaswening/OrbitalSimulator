@@ -25,5 +25,5 @@ Since there currently is neither a GUI nor a functional console interface, all o
 ## Technologies
 I use C# for the simulation logic and Python for the plotting logic. I will probably use WPF and the MVVM pattern for the GUI in the future and if I feel adventurous enough at some point, I might ditch C# in favour of C++ for the numerical part altogether.
 
-##License
+## License
 GNU General Public License v3.0
