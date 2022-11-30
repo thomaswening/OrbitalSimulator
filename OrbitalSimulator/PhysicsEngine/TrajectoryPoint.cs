@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-namespace PhysicsEngine
+
+namespace OrbitalSimulator.PhysicsEngine
 {
     /// <summary>
     /// Represents a point in the trajectory of a body, i.e. (time, x, y, z).
     /// </summary>
-    internal struct TrajectoryPoint
+    internal readonly struct TrajectoryPoint
     {
-        double[] Components;
+        #region Fields
+
+        readonly double[] Components;
+
+        #endregion Fields
+
+        #region Properties
 
         public double T
         {
@@ -30,6 +37,10 @@ namespace PhysicsEngine
             set => Components[3] = value;
         }
 
+        #endregion Properties
+
+        #region Public Constructors
+
         public TrajectoryPoint(double t, double x, double y, double z)
         {
             Components = new double[4] { t, x, y, z };
@@ -46,6 +57,12 @@ namespace PhysicsEngine
             }
         }
 
-        public Vector3 ToVector3() => new Vector3(Components[1], Components[2], Components[3]);
+        #endregion Public Constructors
+
+        #region Public Methods
+
+        public Vector3 ToVector3() => new(Components[1], Components[2], Components[3]);
+
+        #endregion Public Methods
     }
 }

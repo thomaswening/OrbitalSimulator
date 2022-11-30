@@ -4,13 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PhysicsEngine
+namespace OrbitalSimulator.PhysicsEngine
 {
     /// <summary>
     /// Represents a three-dimensional, Euclidean vector
     /// </summary>
     internal class Vector3
     {
+        #region Properties
+
+        public static Vector3 Zero => new(0, 0, 0);
         public double[] Components { get; set; }
 
         public double X
@@ -29,12 +32,6 @@ namespace PhysicsEngine
             set => Components[2] = value;
         }
 
-        public Vector3(double x, double y, double z)
-        {
-            Components = new double[3] { x, y, z };
-        }
-
-        public static Vector3 Zero => new Vector3(0, 0, 0);
         public double LengthSquared
         {
             get
@@ -51,6 +48,19 @@ namespace PhysicsEngine
 
         public double Length => Math.Sqrt(LengthSquared);
 
+        #endregion Properties
+
+        #region Public Constructors
+
+        public Vector3(double x, double y, double z)
+        {
+            Components = new double[3] { x, y, z };
+        }
+
+        #endregion Public Constructors
+
+        #region Public Methods
+
         public static Vector3 Normalize(Vector3 vector)
         {
             double[] normalizedComponents = new double[3];
@@ -60,14 +70,6 @@ namespace PhysicsEngine
             }
 
             return new Vector3(normalizedComponents[0], normalizedComponents[1], normalizedComponents[2]);
-        }
-
-        public void Normalize()
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                Components[i] /= Length;
-            }
         }
 
         public static Vector3 Add(Vector3 left, Vector3 right)
@@ -103,6 +105,25 @@ namespace PhysicsEngine
 
         public static double Distance(Vector3 left, Vector3 right) => Math.Sqrt(DistanceSquared(left, right));
 
+        public static Vector3 operator +(Vector3 left, Vector3 right) => Add(left, right);
+
+        public static Vector3 operator -(Vector3 left, Vector3 right) => Subtract(left, right);
+
+        public static double operator *(Vector3 left, Vector3 right) => Multiply(left, right);
+
+        public static Vector3 operator *(double scalar, Vector3 vector) => Multiply(scalar, vector);
+
+        public static Vector3 operator *(Vector3 vector, double scalar) => Multiply(scalar, vector);
+
+        public static Vector3 operator /(Vector3 vector, double scalar) => Divide(vector, scalar);
+
+        public void Normalize()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                Components[i] /= Length;
+            }
+        }
         public override string ToString()
         {
             StringBuilder sb = new("<");
@@ -113,11 +134,6 @@ namespace PhysicsEngine
             return sb.ToString();
         }
 
-        public static Vector3 operator +(Vector3 left, Vector3 right) => Add(left, right);
-        public static Vector3 operator -(Vector3 left, Vector3 right) => Subtract(left, right);
-        public static double operator *(Vector3 left, Vector3 right) => Multiply(left, right);
-        public static Vector3 operator *(double scalar, Vector3 vector) => Multiply(scalar, vector);
-        public static Vector3 operator *(Vector3 vector, double scalar) => Multiply(scalar, vector);
-        public static Vector3 operator /(Vector3 vector, double scalar) => Divide(vector, scalar);
+        #endregion Public Methods
     }
 }

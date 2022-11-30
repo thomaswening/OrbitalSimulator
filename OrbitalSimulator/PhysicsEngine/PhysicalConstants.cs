@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PhysicsEngine
+namespace OrbitalSimulator.PhysicsEngine
 {
     internal static class PhysicalConstants
     {

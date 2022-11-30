@@ -4,17 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PhysicsEngine
+namespace OrbitalSimulator.Utilities
 {
     /// <summary>
     /// An ASCII progress bar
     /// </summary>
     internal class ProgressBar : IDisposable, IProgress<double>
     {
-        private const int blockCount = 10;
-        private readonly TimeSpan animationInterval = TimeSpan.FromSeconds(1.0 / 8);
-        private const string animation = @"|/-\";
+        #region Fields
 
+        private const int blockCount = 10;
+        private const string animation = @"|/-\";
+        private readonly TimeSpan animationInterval = TimeSpan.FromSeconds(1.0 / 8);
         private readonly Timer timer;
 
         private double currentProgress = 0;
@@ -22,9 +23,13 @@ namespace PhysicsEngine
         private bool disposed = false;
         private int animationIndex = 0;
 
+        #endregion Fields
+
+        #region Public Constructors
+
         public ProgressBar()
         {
-            timer = new Timer(TimerHandler);
+            timer = new Timer(TimerHandler!);
 
             // A progress bar is only for temporary display in a console window.
             // If the console output is redirected to a file, draw nothing.
@@ -35,12 +40,29 @@ namespace PhysicsEngine
             }
         }
 
+        #endregion Public Constructors
+
+        #region Public Methods
+
         public void Report(double value)
         {
             // Make sure value is in [0..1] range
             value = Math.Max(0, Math.Min(1, value));
             Interlocked.Exchange(ref currentProgress, value);
         }
+
+        public void Dispose()
+        {
+            lock (timer)
+            {
+                disposed = true;
+                UpdateText(string.Empty);
+            }
+        }
+
+        #endregion Public Methods
+
+        #region Private Methods
 
         private void TimerHandler(object state)
         {
@@ -65,17 +87,18 @@ namespace PhysicsEngine
             // Get length of common portion
             int commonPrefixLength = 0;
             int commonLength = Math.Min(currentText.Length, text.Length);
+
             while (commonPrefixLength < commonLength && text[commonPrefixLength] == currentText[commonPrefixLength])
             {
                 commonPrefixLength++;
             }
 
             // Backtrack to the first differing character
-            StringBuilder outputBuilder = new StringBuilder();
+            StringBuilder outputBuilder = new();
             outputBuilder.Append('\b', currentText.Length - commonPrefixLength);
 
             // Output new suffix
-            outputBuilder.Append(text.Substring(commonPrefixLength));
+            outputBuilder.Append(text.AsSpan(commonPrefixLength));
 
             // If the new text is shorter than the old one: delete overlapping characters
             int overlapCount = currentText.Length - text.Length;
@@ -94,14 +117,6 @@ namespace PhysicsEngine
             timer.Change(animationInterval, TimeSpan.FromMilliseconds(-1));
         }
 
-        public void Dispose()
-        {
-            lock (timer)
-            {
-                disposed = true;
-                UpdateText(string.Empty);
-            }
-        }
-
+        #endregion Private Methods
     }
 }

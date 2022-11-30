@@ -5,18 +5,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PhysicsEngine
+namespace OrbitalSimulator.Utilities
 {
     internal class Clock
     {
         #region Fields
 
-        static int dayInSeconds = 24 * 60 * 60;
-        static int hourInSeconds = 60 * 60;
-        static int minuteInSeconds = 60;
-        static int yearInSeconds = 365 * 24 * 60 * 60;
+        static readonly int dayInSeconds = 24 * 60 * 60;
+        static readonly int hourInSeconds = 60 * 60;
+        static readonly int minuteInSeconds = 60;
+        static readonly int yearInSeconds = 365 * 24 * 60 * 60;
 
-        double elapsedSeconds = 0;
+        readonly double elapsedSeconds = 0;
         public double ElapsedSeconds => elapsedSeconds;
 
         #endregion Fields
@@ -51,13 +51,13 @@ namespace PhysicsEngine
             remainderInSeconds = elapsedSeconds % yearInSeconds;
 
             days = (int)Math.Floor(remainderInSeconds / dayInSeconds);
-            remainderInSeconds = remainderInSeconds % dayInSeconds;
+            remainderInSeconds %= dayInSeconds;
 
             hours = (int)Math.Floor(remainderInSeconds / hourInSeconds);
-            remainderInSeconds = remainderInSeconds % hourInSeconds;
+            remainderInSeconds %= hourInSeconds;
 
             minutes = (int)Math.Floor(remainderInSeconds / minuteInSeconds);
-            remainderInSeconds = remainderInSeconds % minuteInSeconds;
+            remainderInSeconds %= minuteInSeconds;
 
             StringBuilder sb = new();
 

@@ -1,14 +1,23 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reflection.Metadata;
 using System.Text;
+using OrbitalSimulator.PhysicsEngine;
+using OrbitalSimulator.Utilities;
 
 namespace PhysicsEngine
 {
     internal class Program
     {
+        static readonly string dataPath = @"E:\Users\thoma\Desktop";
         static void Main(string[] args)
         {
-            List<Body> simulationBodies = new List<Body>();
+            RunExample();
+        }
+
+        static void RunExample()
+        {
+            List<Body> simulationBodies = new();
 
             Body sun = new(
                     pMass: 1.989e30,
@@ -137,39 +146,8 @@ namespace PhysicsEngine
             Engine simulation = new(timeSpan, timeResolution, simulationBodies);
             Clock runtimeClock = new(simulation.Run);
 
-            ////simulation.PrintToScreen();
-            simulation.PrintToFile();
-            //MakePlot();
-            //Console.WriteLine("Plotting done!");
-        }
-
-        public static void MakePlot()
-        {
-            ProcessStartInfo startInfo = new()
-            {
-                FileName = "python.exe",
-                Arguments = @"E:\Users\thoma\source\repos\OrbitalSimulator\Plotting\plotting.py",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true
-            };
-
-            using Process process = new() 
-            { 
-                StartInfo = startInfo,
-                EnableRaisingEvents = true 
-            };
-
-            process.OutputDataReceived += new DataReceivedEventHandler((sender, args) => Console.WriteLine(args.Data));
-            process.ErrorDataReceived += new DataReceivedEventHandler((sender, args) => Console.WriteLine(args.Data));
-            process.Exited += new EventHandler((sender, args) =>
-            {
-                Console.WriteLine(string.Format("process exited with code {0}\n", process.ExitCode.ToString()));
-            });
-
-            process.Start();
-            process.BeginErrorReadLine();
-            process.BeginOutputReadLine();
+            Directory.CreateDirectory(Path.Combine(dataPath, @"Output"));
+            simulation.PrintToFile(Path.Combine(dataPath, @"Output\output.dat"));
         }
     }
 }

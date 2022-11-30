@@ -6,48 +6,49 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PhysicsEngine
+namespace OrbitalSimulator.PhysicsEngine
 {
     /// <summary>
     /// Represents a body to partake in the orbital simulation
     /// </summary>
     internal class Body
     {
+
         #region Fields
 
         static int numberOfUnnamedBodies;
-        static int numberOfBodies;
         static int numberOfMassiveBodies;
 
         readonly List<TrajectoryPoint> trajectory = new();
 
-        int cacheId;
         bool isFixed;
         bool isMassive;
         double mass;
-        string name;        
+        int cacheId;
+        readonly string name;
 
         #endregion Fields
 
         #region Properties
-        static public int NumberOfMassiveBodies => numberOfMassiveBodies;
-        public int CacheId => cacheId;        
-        public Vector3 CurrentAcceleration { get; set; } = Vector3.Zero;
-        public Vector3 CurrentPosition { get; set; }
-        public double CurrentPotentialEnergy { get; set; } = 0.0;
-        public Vector3 CurrentVelocity { get; set; }
+
         public bool IsFixed => isFixed;
         public bool IsMassive => isMassive;
+        public double CurrentPotentialEnergy { get; set; } = 0.0;
         public double KineticEnergy => 0.5 * mass * CurrentVelocity.LengthSquared;
-        public Vector3 LastPosition => trajectory[^2].ToVector3();
         public double Mass => mass;
-        public string Name => name;
-        public Vector3 NextPosition { get; set; } = Vector3.Zero;
+        public int CacheId => cacheId;
         public List<TrajectoryPoint> Trajectory => trajectory;
+        public string Name => name;
+        public Vector3 CurrentAcceleration { get; set; } = Vector3.Zero;
+        public Vector3 CurrentPosition { get; set; }
+        public Vector3 CurrentVelocity { get; set; }
+        public Vector3 LastPosition => trajectory[^2].ToVector3();
+        public Vector3 NextPosition { get; set; } = Vector3.Zero;
+        static public int NumberOfMassiveBodies => numberOfMassiveBodies;
 
         #endregion Properties
 
-        #region Constructors
+        #region Public Constructors
 
         public Body(double pMass, Vector3 pInitialVelocity, Vector3 pInitialPosition, bool pIsMassive, bool pIsFixed, string pName)
         {
@@ -64,14 +65,13 @@ namespace PhysicsEngine
             name = "Object" + numberOfUnnamedBodies;
         }
 
-        #endregion Constructors
+        #endregion Public Constructors
 
-        #region Methods
+        #region Public Methods
 
         [MemberNotNull(nameof(CurrentVelocity), nameof(CurrentPosition))]
         public void Initialize(double pMass, Vector3 pInitialVelocity, Vector3 pInitialPosition, bool pIsMassive, bool pIsFixed)
         {
-            numberOfBodies++;
             CurrentVelocity = pInitialVelocity;
             CurrentPosition = pInitialPosition;
 
@@ -125,6 +125,7 @@ namespace PhysicsEngine
 
         public void ClearTrajectory() => trajectory.RemoveRange(1, trajectory.Count - 2);
 
-        #endregion Methods
+        #endregion Public Methods
+
     }
 }

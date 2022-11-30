@@ -4,19 +4,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PhysicsEngine
+using OrbitalSimulator.Utilities;
+
+using PhysicsEngine;
+
+namespace OrbitalSimulator.PhysicsEngine
 {
     /// <summary>
     /// Evaluates the physics between all bodies and calculates the bodies' trajectories.
     /// </summary>
     internal class Engine
     {
+        #region Fields
+
         readonly List<Body> bodies = new();
         readonly double timeSpan;
         readonly double timeResolution;
         readonly List<double> timeSamples = new() { 0 };
-        private readonly string dataPath = @"E:\Users\thoma\Desktop\simulation_run.txt";
         ForceCache? forceCache;
+
+        #endregion Fields
+
+        #region Public Constructors
 
         public Engine(double pTimeSpan, double pTimeResolution)
         {
@@ -32,6 +41,10 @@ namespace PhysicsEngine
         {
             bodies.AddRange(pBodies);
         }
+
+        #endregion Public Constructors
+
+        #region Public Methods
 
         public void AddBody(Body pBody) => bodies.Add(pBody);
 
@@ -58,70 +71,7 @@ namespace PhysicsEngine
                 }
             }
 
-            Console.WriteLine("\nDone. Starting plotting script...");
-        }
-
-        void ProceedOneStep(bool pIsFirstStep)
-        {
-            forceCache!.Refresh(bodies);
-
-            foreach (Body body in bodies)
-            {
-                if (!body.IsFixed) CalculateNextPosition(pIsFirstStep, body);
-                body.CurrentPotentialEnergy = body.IsMassive? EvaluatePotentialOf(body) : 0;
-            }
-        }
-
-        private void CalculateNextPosition(bool pIsFirstStep, Body pBody)
-        {
-            if (pBody.Mass == 0.0)
-            {
-                pBody.NextPosition = timeResolution * pBody.CurrentVelocity;
-            }
-            else
-            {
-                pBody.CurrentAcceleration = EvaluateNetForceOn(pBody) / pBody.Mass;
-
-                Integrator.Integrate(IntegrationType.LeapFrog, pBody, timeResolution, pIsFirstStep);
-            }
-        }
-
-        void Update(double pSimulationTime)
-        {
-            foreach (Body body in this.bodies)
-            {
-                body.UpdateTrajectory(pSimulationTime);
-            }
-        }
-
-        Vector3 EvaluateNetForceOn(Body pBody)
-        {
-            Vector3 netForce = Vector3.Zero;
-
-            foreach (Body body2 in bodies.Where(x => x.IsMassive))
-            {
-                if (body2 != pBody) netForce += forceCache!.Fetch(pBody, body2);
-            }
-
-            return netForce;
-        }
-
-        double EvaluatePotentialOf(Body pBody)
-        {
-            double potential = 0;
-
-            if (forceCache is null) throw new Exception($"{nameof(forceCache)} has not been initialized.");
-
-            foreach (Body body2 in bodies.Where(x => x.IsMassive))
-            {
-                if (body2 != pBody)
-                {
-                    Vector3 cachedForce = forceCache.Fetch(pBody, body2);
-                    potential += (-1) * cachedForce.Length * Vector3.Distance(body2.CurrentPosition, pBody.CurrentPosition);
-                }
-            }
-
-            return potential;
+            Console.WriteLine("\nDone.");
         }
 
         public string ToString(string pDelimiter = ",")
@@ -136,7 +86,7 @@ namespace PhysicsEngine
             sb.Append($"=> number of time samples: {timeSamples.Count}\n\n");
 
             sb.Append($"time (s)" + pDelimiter);
-            foreach(Body body in bodies)
+            foreach (Body body in bodies)
             {
                 sb.Append($"{body.Name} X (km)" + pDelimiter);
                 sb.Append($"{body.Name} Y (km)" + pDelimiter);
@@ -166,18 +116,87 @@ namespace PhysicsEngine
 
         public override string ToString() => ToString();
 
-        public void PrintToScreen(string pDelimiter = ",") => Console.WriteLine(ToString());
+        public void PrintToScreen() => Console.WriteLine(ToString());
 
-        public void PrintToFile(string pDelimiter = ",")
+        public void PrintToFile(string path)
         {
-            using StreamWriter file = new(dataPath);
+            using StreamWriter file = new(path);
             file.WriteLine(ToString());
         }
+
+        #endregion Public Methods
+
+        #region Private Methods
 
         static void EndLine(StringBuilder pStringBuilder, string pDelimiter)
         {
             pStringBuilder.Remove(pStringBuilder.Length - pDelimiter.Length, pDelimiter.Length);
             pStringBuilder.Append('\n');
         }
+
+        void ProceedOneStep(bool pIsFirstStep)
+        {
+            forceCache!.Refresh(bodies);
+
+            foreach (Body body in bodies)
+            {
+                if (!body.IsFixed) CalculateNextPosition(pIsFirstStep, body);
+                body.CurrentPotentialEnergy = body.IsMassive ? EvaluatePotentialOf(body) : 0;
+            }
+        }
+
+        private void CalculateNextPosition(bool pIsFirstStep, Body pBody)
+        {
+            if (pBody.Mass == 0.0)
+            {
+                pBody.NextPosition = timeResolution * pBody.CurrentVelocity;
+            }
+            else
+            {
+                pBody.CurrentAcceleration = EvaluateNetForceOn(pBody) / pBody.Mass;
+
+                Integrator.Integrate(IntegrationType.LeapFrog, pBody, timeResolution, pIsFirstStep);
+            }
+        }
+
+        void Update(double pSimulationTime)
+        {
+            foreach (Body body in bodies)
+            {
+                body.UpdateTrajectory(pSimulationTime);
+            }
+        }
+
+        Vector3 EvaluateNetForceOn(Body pBody)
+        {
+            Vector3 netForce = Vector3.Zero;
+
+            foreach (Body body2 in bodies.Where(x => x.IsMassive))
+            {
+                if (body2 != pBody) netForce += forceCache!.Fetch(pBody, body2);
+            }
+
+            return netForce;
+        }
+
+        double EvaluatePotentialOf(Body pBody)
+        {
+            double potential = 0;
+
+            if (forceCache is null) throw new Exception($"{nameof(forceCache)} has not been initialized.");
+
+            foreach (Body body2 in bodies.Where(x => x.IsMassive))
+            {
+                if (body2 != pBody)
+                {
+                    Vector3 cachedForce = forceCache.Fetch(pBody, body2);
+                    potential += -1 * cachedForce.Length * Vector3.Distance(body2.CurrentPosition, pBody.CurrentPosition);
+                }
+            }
+
+            return potential;
+        }
+
+        #endregion Private Methods
     }
 }

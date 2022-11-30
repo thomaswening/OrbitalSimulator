@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PhysicsEngine
+namespace OrbitalSimulator.PhysicsEngine
 {
     internal static class Integrator
     {
+        #region Public Methods
+
         public static void Integrate(IntegrationType pIntegrationType, Body pBody, double pTimeResolution, bool pIsFirstStep)
         {
             switch (pIntegrationType)
@@ -29,9 +31,13 @@ namespace PhysicsEngine
             }
         }
 
+        #endregion Public Methods
+
+        #region Private Methods
+
         static void BruteForceIntegrate(Body pBody, double pTimeResolution)
         {
-            pBody.NextPosition = pBody.CurrentPosition +  0.5 * Math.Pow(pTimeResolution, 2) * pBody.CurrentAcceleration + pTimeResolution * pBody.CurrentVelocity;
+            pBody.NextPosition = pBody.CurrentPosition + 0.5 * Math.Pow(pTimeResolution, 2) * pBody.CurrentAcceleration + pTimeResolution * pBody.CurrentVelocity;
             pBody.CurrentVelocity += pTimeResolution * pBody.CurrentAcceleration;
         }
 
@@ -43,7 +49,7 @@ namespace PhysicsEngine
 
             if (pIsFirstStep)
             {
-                pBody.NextPosition = pBody.CurrentPosition +  0.5 * Math.Pow(pTimeResolution, 2) * pBody.CurrentAcceleration + pTimeResolution * pBody.CurrentVelocity;
+                pBody.NextPosition = pBody.CurrentPosition + 0.5 * Math.Pow(pTimeResolution, 2) * pBody.CurrentAcceleration + pTimeResolution * pBody.CurrentVelocity;
                 pBody.CurrentVelocity += pTimeResolution / 2.0 * pBody.CurrentAcceleration;
             }
             else
@@ -60,12 +66,14 @@ namespace PhysicsEngine
 
             if (pIsFirstStep)
             {
-                pBody.NextPosition = pBody.CurrentPosition +  0.5 * Math.Pow(pTimeResolution, 2) * pBody.CurrentAcceleration + pTimeResolution * pBody.CurrentVelocity;
+                pBody.NextPosition = pBody.CurrentPosition + 0.5 * Math.Pow(pTimeResolution, 2) * pBody.CurrentAcceleration + pTimeResolution * pBody.CurrentVelocity;
             }
             else
             {
                 pBody.NextPosition = 2.0 * pBody.CurrentPosition - pBody.LastPosition + pBody.CurrentAcceleration * Math.Pow(pTimeResolution, 2);
             }
         }
+
+        #endregion Private Methods
     }
 }

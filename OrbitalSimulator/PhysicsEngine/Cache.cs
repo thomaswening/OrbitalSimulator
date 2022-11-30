@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PhysicsEngine
+namespace OrbitalSimulator.PhysicsEngine
 {
     /// <summary>
     /// Stores the gravitational forces the bodies each extert on the other bodies in the simulation.
@@ -57,7 +57,7 @@ namespace PhysicsEngine
         {
             if (i == j) throw new ArgumentException("Diagonal elements cannot ever be fetched because they are undefined.", nameof(j));
 
-            if (i < j) return (-1) * Fetch(j, i); // prefactor comes from antisymmetry of force matrix
+            if (i < j) return -1 * Fetch(j, i); // prefactor comes from antisymmetry of force matrix
 
             if (grid[i, j] is null) throw new Exception("Cache has not been initialized.");
 
