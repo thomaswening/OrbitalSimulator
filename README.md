@@ -1,6 +1,8 @@
 # OrbitalSimulator
 Gravity simulation for non-relativistic astromechanics
 
+![](https://github.com/thomaswening/media/blob/main/SolarSystem.gif?raw=true)
+
 ## Decription
 *OrbitalSimulator* is an n-body gravity simulation. I am building this project just out of curiosity and to practice writing C# code. 
 
