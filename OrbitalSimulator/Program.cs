@@ -17,16 +17,20 @@ namespace PhysicsEngine
         static readonly string dataPath = @"E:\Users\thoma\Desktop";
         static void Main(string[] args)
         {
-            //SavePreset(CreatePresetFromEngine(InitializeExample(Example.SolarSystem), "SolarSystem"), Path.Combine(dataPath, "SolarSystem"));
-            //SavePreset(CreatePresetFromEngine(InitializeExample(Example.EarthMoonIss), "EarthMoonIss"), Path.Combine(dataPath, "EarthMoonIss"));
+            SavePreset(CreatePresetFromEngine(InitializeExample(Example.SolarSystem), "SolarSystem"), Path.Combine(dataPath, "SolarSystem"));
+            SavePreset(CreatePresetFromEngine(InitializeExample(Example.EarthMoonIss), "EarthMoonIss"), Path.Combine(dataPath, "EarthMoonIss"));
 
             Engine? engine = InitializePreset(Path.Combine(dataPath, "SolarSystem.json"));
             engine?.Run();
             engine?.PrintToFile(Path.Combine(dataPath, "SolarSystem.dat"));
 
-            //engine = InitializePreset(Path.Combine(dataPath, "EarthMoonIss.json"));
-            //engine?.Run();
-            //engine?.PrintToFile(Path.Combine(dataPath, "EarthMoonIss.dat"));
+            engine = InitializePreset(Path.Combine(dataPath, "EarthMoonIss.json"));
+            engine?.Run();
+            engine?.PrintToFile(Path.Combine(dataPath, "EarthMoonIss.dat"));
+
+            //Engine engine = InitializeExample(Example.EarthMoonIss);
+            //engine.Run();
+            //engine.PrintToFile(Path.Combine(dataPath, "EarthMoonIss.dat"));
 
             //if (args.Length == 1) InitializeEngine(args[0]);
             //else Console.WriteLine("Invalid input.");
@@ -146,32 +150,25 @@ namespace PhysicsEngine
         static Engine InitializeExample(Example example)
         {
             List<Body> simulationBodies = new();
-
-            Body earth = new(
-                    mass: 5.972e24,
-                    initialVelocity: new Vector3(0, 30.29e3, 0),
-                    initialPosition: new Vector3(1.471e11, 0, 0),
-                    isMassive: true,
-                    isFixed: false,
-                    name: "Earth"
-                );
-            simulationBodies.Add(earth);
+            double timeSpan;
+            double timeResolution;
 
             switch (example)
             {
                 case Example.EarthMoonIss:
                     AddEarthMoonIssBodies(simulationBodies);
+                    timeSpan = 1 * 365 * 24 * Math.Pow(60, 2);  // 1 month
+                    timeResolution = 12 * Math.Pow(60, 2);      // 12 hours
                     break;
 
                 case Example.SolarSystem:
                     AddSolarSystemBodies(simulationBodies);
+                    timeSpan = 1 * 365 * 24 * Math.Pow(60, 2);   // 1 Earth year
+                    timeResolution = 24 * Math.Pow(60, 2);       // 1 Earth day
                     break;
 
                 default: throw new NotImplementedException();
-            }            
-
-            double timeSpan = 1 * 365 * 24 * Math.Pow(60, 2);   // 1 Earth year
-            double timeResolution = 24 * Math.Pow(60, 2);       // 1 day
+            }
 
             return new Engine(timeSpan, timeResolution, Integrator.IntegrationType.LeapFrog, simulationBodies);
         }
@@ -187,7 +184,7 @@ namespace PhysicsEngine
                 name: "Sun"
                 );
             simulationBodies.Add(sun);
-
+            
             Body mercury = new(
                 mass: 3.285e23,
                 initialVelocity: new Vector3(0, 58.98e3, 0),
@@ -207,6 +204,16 @@ namespace PhysicsEngine
                 name: "Venus"
                 );
             simulationBodies.Add(venus);
+
+            Body earth = new(
+                    mass: 5.972e24,
+                    initialVelocity: new Vector3(0, 30.29e3, 0),
+                    initialPosition: new Vector3(1.471e11, 0, 0),
+                    isMassive: true,
+                    isFixed: false,
+                    name: "Earth"
+                );
+            simulationBodies.Add(earth);
 
             Body mars = new(
                 mass: 6.39e23,
@@ -261,10 +268,20 @@ namespace PhysicsEngine
 
         private static void AddEarthMoonIssBodies(List<Body> simulationBodies)
         {
+            Body earth = new(
+                    mass: 5.972e24,
+                    initialVelocity: Vector3.Zero,
+                    initialPosition: Vector3.Zero,
+                    isMassive: true,
+                    isFixed: true,
+                    name: "Earth"
+                );
+            simulationBodies.Add(earth);
+
             Body moon = new(
                     mass: 7.348e22,
-                    initialVelocity: new Vector3(0, 30e3 + 1.022e3, 0),
-                    initialPosition: new Vector3(150e9 + 385e6, 0, 0),
+                    initialVelocity: new Vector3(0, 1.022e3, 0),
+                    initialPosition: new Vector3(385e6, 0, 0),
                     isMassive: true,
                     isFixed: false,
                     name: "Moon"
@@ -273,8 +290,8 @@ namespace PhysicsEngine
 
             Body iss = new(
                     mass: 444.615e3,
-                    initialVelocity: new Vector3(0, 30e3 + 7.66e3, 0),
-                    initialPosition: new Vector3(150e9 + 6.371e6 + 412e3, 0, 0),
+                    initialVelocity: new Vector3(0, 7.66e3, 0),
+                    initialPosition: new Vector3(6.371e6 + 412e3, 0, 0),
                     isMassive: false,
                     isFixed: false,
                     name: "ISS"
