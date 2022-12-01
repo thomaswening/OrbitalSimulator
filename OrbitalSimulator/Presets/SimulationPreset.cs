@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 using OrbitalSimulator.Presets;
@@ -33,12 +34,18 @@ namespace OrbitalSimulator.Models
 
         #region Public Constructors
 
-        public SimulationPreset(string name, string integrationType, double timeSpan, double timeResolution)
+        public SimulationPreset(string name, double timeSpan, double timeResolution, string integrationType)
         { 
             Name = name;
             IntegrationType = integrationType;
             TimeSpan = timeSpan;
             TimeResolution = timeResolution;
+        }
+
+        [JsonConstructor]
+        public SimulationPreset(string name, double timeSpan, double timeResolution, string integrationType, List<BodyPreset> bodies) : this(name, timeSpan, timeResolution, integrationType)
+        {
+            this.bodies = bodies;
         }
 
         #endregion Public Constructors

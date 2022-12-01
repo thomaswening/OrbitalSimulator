@@ -20,10 +20,14 @@ namespace OrbitalSimulator.PhysicsEngine
         #region Fields
 
         readonly List<Body> bodies = new();
-        readonly double timeSpan;
-        readonly double timeResolution;
         readonly List<double> timeSamples = new() { 0 };
         ForceCache? forceCache;
+
+        public double TimeSpan { get; set; }
+        public double TimeResolution { get; set; }
+        public List<Body> Bodies => bodies;
+
+        public IntegrationType IntegrationType { get; set; }
 
         #endregion Fields
 
@@ -31,12 +35,13 @@ namespace OrbitalSimulator.PhysicsEngine
 
         public Engine(double timeSpan, double timeResolution, IntegrationType integrationType)
         {
-            if (timeSpan < 0) throw new ArgumentException("The time span must be greater than zero.", nameof(timeSpan));
+            if (TimeSpan < 0) throw new ArgumentException("The time span must be greater than zero.", nameof(timeSpan));
 
-            if (timeSpan < timeResolution) throw new ArgumentException("The time span must be greater than the time resolution.", nameof(timeResolution));
+            if (TimeSpan < TimeResolution) throw new ArgumentException("The time span must be greater than the time resolution.", nameof(timeResolution));
 
-            this.timeSpan = timeSpan;
-            this.timeResolution = timeResolution;
+            TimeSpan = timeSpan;
+            TimeResolution = timeResolution;
+            IntegrationType = integrationType;
         }
 
         public Engine(double timeSpan, double timeResolution, IntegrationType integrationType, List<Body> bodies) : this(timeSpan, timeResolution, integrationType)
@@ -60,16 +65,16 @@ namespace OrbitalSimulator.PhysicsEngine
             Console.WriteLine("Running simulation... ");
             using (var progress = new ProgressBar())
             {
-                double simulationTime = timeResolution;
+                double simulationTime = TimeResolution;
 
-                while (simulationTime <= timeSpan)
+                while (simulationTime <= TimeSpan)
                 {
                     timeSamples.Add(simulationTime);
-                    ProceedOneStep(simulationTime == timeResolution);
+                    ProceedOneStep(simulationTime == TimeResolution);
 
                     Update(simulationTime);
-                    progress.Report(simulationTime / timeSpan);
-                    simulationTime += timeResolution;
+                    progress.Report(simulationTime / TimeSpan);
+                    simulationTime += TimeResolution;
                 }
             }
 
@@ -83,8 +88,8 @@ namespace OrbitalSimulator.PhysicsEngine
             // Header
 
             sb.Append($"Simulation Run Results\n\n");
-            sb.Append($"time span (s): {timeSpan}\n");
-            sb.Append($"time resolution (s): {timeResolution}\n");
+            sb.Append($"time span (s): {TimeSpan}\n");
+            sb.Append($"time resolution (s): {TimeResolution}\n");
             sb.Append($"=> number of time samples: {timeSamples.Count}\n\n");
 
             sb.Append($"time (s)" + delimiter);
@@ -151,13 +156,13 @@ namespace OrbitalSimulator.PhysicsEngine
         {
             if (body.Mass == 0.0)
             {
-                body.NextPosition = timeResolution * body.CurrentVelocity;
+                body.NextPosition = TimeResolution * body.CurrentVelocity;
             }
             else
             {
                 body.CurrentAcceleration = EvaluateNetForceOn(body) / body.Mass;
 
-                Integrator.Integrate(IntegrationType.LeapFrog, body, timeResolution, isFirstStep);
+                Integrator.Integrate(IntegrationType, body, TimeResolution, isFirstStep);
             }
         }
 

@@ -15,14 +15,27 @@ namespace OrbitalSimulator.PhysicsEngine
             Verlet
         }
 
-        public static IntegrationType? GetIntegrationType(string input)
+        public static IntegrationType GetIntegrationType(string input)
         {
             return input.ToLower() switch
             {
-                "bruteforce" => (IntegrationType?)IntegrationType.BruteForce,
-                "leapfrog" => (IntegrationType?)IntegrationType.LeapFrog,
-                "verlet" => (IntegrationType?)IntegrationType.Verlet,
-                _ => throw new NotImplementedException(),
+                "bruteforce" => IntegrationType.BruteForce,
+                "leapfrog" => IntegrationType.LeapFrog,
+                "verlet" => IntegrationType.Verlet,
+
+                _ => throw new NotImplementedException()
+            };
+        }
+
+        public static string GetIntegrationTypeStr(IntegrationType integrationType)
+        {
+            return integrationType switch
+            {
+                IntegrationType.BruteForce => "bruteforce",
+                IntegrationType.LeapFrog => "leapfrog",
+                IntegrationType.Verlet => "verlet",
+
+                _ => throw new NotImplementedException()
             };
         }
 

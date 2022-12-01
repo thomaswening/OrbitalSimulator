@@ -5,6 +5,8 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
+using OrbitalSimulator.PhysicsEngine;
+
 namespace OrbitalSimulator.Presets
 {
     internal class BodyPreset
@@ -14,26 +16,29 @@ namespace OrbitalSimulator.Presets
 
         private readonly double[] initialPosition = new double[3];
         private readonly double[] initialVelocity = new double[3];
-        private double mass;
 
         #endregion Fields
 
-        #region Properties
+        public BodyPreset(bool isMassive, bool isFixed, double mass, double[] initialPosition, double[] initialVelocity, string name = "")
+        {
+            if (initialPosition.Length != 3) throw new ArgumentException("Length must be 3.", nameof(initialPosition));
+            if (initialVelocity.Length != 3) throw new ArgumentException("Length must be 3.", nameof(initialVelocity));
 
-        public bool IsFixed { get; set; }
-        public bool IsMassive { get; set; }
-        public double Mass 
-        { 
-            get
-            {
-                if (IsMassive) return mass;
-                return 0;
-            }
+            Name = name;
+            IsMassive = isMassive;
+            IsFixed = isFixed;
+            Mass = mass;
 
-            set { mass = value; }
+            this.initialPosition = initialPosition;
+            this.initialVelocity = initialVelocity;
         }
 
+        #region Properties
+
         public string Name { get; set; } = string.Empty;
+        public bool IsFixed { get; set; }
+        public bool IsMassive { get; set; }
+        public double Mass { get; set; }        
         public double[] InitialPosition => initialPosition;
         public double[] InitialVelocity
         {

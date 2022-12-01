@@ -17,7 +17,7 @@ namespace OrbitalSimulator.PhysicsEngine
         #region Fields
 
         static int numberOfUnnamedBodies;
-        static int numberOfMassiveBodies;
+        static int numberOfBodies;
 
         readonly List<TrajectoryPoint> trajectory = new();
 
@@ -41,9 +41,11 @@ namespace OrbitalSimulator.PhysicsEngine
         public Vector3 CurrentAcceleration { get; set; } = Vector3.Zero;
         public Vector3 CurrentPosition { get; set; }
         public Vector3 CurrentVelocity { get; set; }
+        public Vector3 InitialPosition { get; set; }
+        public Vector3 InitialVelocity { get; set; }
         public Vector3 LastPosition => trajectory[^2].ToVector3();
         public Vector3 NextPosition { get; set; } = Vector3.Zero;
-        static public int NumberOfMassiveBodies => numberOfMassiveBodies;
+        static public int NumberOfMassiveBodies => numberOfBodies;
 
         #endregion Properties
 
@@ -71,18 +73,18 @@ namespace OrbitalSimulator.PhysicsEngine
         [MemberNotNull(nameof(CurrentVelocity), nameof(CurrentPosition))]
         public void Initialize(double mass, bool isMassive, bool isFixed, Vector3 initialVelocity, Vector3 initialPosition)
         {
-            CurrentVelocity = initialVelocity;
-            CurrentPosition = initialPosition;
+            InitialVelocity = initialVelocity;
+            InitialPosition = initialPosition;
+
+            CurrentVelocity = InitialVelocity;
+            CurrentPosition = InitialPosition;
 
             this.mass = mass;
             this.isMassive = isMassive;
             this.isFixed = isFixed;
 
-            if (this.isMassive)
-            {
-                cacheId = numberOfMassiveBodies;
-                numberOfMassiveBodies++;
-            }
+            cacheId = numberOfBodies;
+            numberOfBodies++;
 
             trajectory.Add(new TrajectoryPoint(0, initialPosition.X, initialPosition.Y, initialPosition.Z));
         }
