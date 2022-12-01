@@ -8,22 +8,40 @@ namespace OrbitalSimulator.PhysicsEngine
 {
     internal static class Integrator
     {
+        public enum IntegrationType
+        {
+            BruteForce,
+            LeapFrog,
+            Verlet
+        }
+
+        public static IntegrationType? GetIntegrationType(string input)
+        {
+            return input.ToLower() switch
+            {
+                "bruteforce" => (IntegrationType?)IntegrationType.BruteForce,
+                "leapfrog" => (IntegrationType?)IntegrationType.LeapFrog,
+                "verlet" => (IntegrationType?)IntegrationType.Verlet,
+                _ => throw new NotImplementedException(),
+            };
+        }
+
         #region Public Methods
 
-        public static void Integrate(IntegrationType pIntegrationType, Body pBody, double pTimeResolution, bool pIsFirstStep)
+        public static void Integrate(IntegrationType integrationType, Body body, double timeResolution, bool isFirstStep)
         {
-            switch (pIntegrationType)
+            switch (integrationType)
             {
                 case IntegrationType.BruteForce:
-                    BruteForceIntegrate(pBody, pTimeResolution);
+                    BruteForceIntegrate(body, timeResolution);
                     break;
 
                 case IntegrationType.LeapFrog:
-                    LeapFrogIntegrate(pBody, pTimeResolution, pIsFirstStep);
+                    LeapFrogIntegrate(body, timeResolution, isFirstStep);
                     break;
 
                 case IntegrationType.Verlet:
-                    VerletIntegrate(pBody, pTimeResolution, pIsFirstStep);
+                    VerletIntegrate(body, timeResolution, isFirstStep);
                     break;
 
                 default:
@@ -35,42 +53,42 @@ namespace OrbitalSimulator.PhysicsEngine
 
         #region Private Methods
 
-        static void BruteForceIntegrate(Body pBody, double pTimeResolution)
+        static void BruteForceIntegrate(Body body, double timeResolution)
         {
-            pBody.NextPosition = pBody.CurrentPosition + 0.5 * Math.Pow(pTimeResolution, 2) * pBody.CurrentAcceleration + pTimeResolution * pBody.CurrentVelocity;
-            pBody.CurrentVelocity += pTimeResolution * pBody.CurrentAcceleration;
+            body.NextPosition = body.CurrentPosition + 0.5 * Math.Pow(timeResolution, 2) * body.CurrentAcceleration + timeResolution * body.CurrentVelocity;
+            body.CurrentVelocity += timeResolution * body.CurrentAcceleration;
         }
 
-        static void LeapFrogIntegrate(Body pBody, double pTimeResolution, bool pIsFirstStep)
+        static void LeapFrogIntegrate(Body body, double timeResolution, bool isFirstStep)
         {
             // In the first step we want to calculate the next position from the current velocity,
             // which however is still simultaneous with the current position, so we use Euler for the position
             // and then calculate the next velocity half a time step ahead
 
-            if (pIsFirstStep)
+            if (isFirstStep)
             {
-                pBody.NextPosition = pBody.CurrentPosition + 0.5 * Math.Pow(pTimeResolution, 2) * pBody.CurrentAcceleration + pTimeResolution * pBody.CurrentVelocity;
-                pBody.CurrentVelocity += pTimeResolution / 2.0 * pBody.CurrentAcceleration;
+                body.NextPosition = body.CurrentPosition + 0.5 * Math.Pow(timeResolution, 2) * body.CurrentAcceleration + timeResolution * body.CurrentVelocity;
+                body.CurrentVelocity += timeResolution / 2.0 * body.CurrentAcceleration;
             }
             else
             {
-                pBody.CurrentVelocity += pBody.CurrentAcceleration * pTimeResolution;
-                pBody.NextPosition = pBody.CurrentPosition + pBody.CurrentVelocity * pTimeResolution;
+                body.CurrentVelocity += body.CurrentAcceleration * timeResolution;
+                body.NextPosition = body.CurrentPosition + body.CurrentVelocity * timeResolution;
             }
         }
 
-        static void VerletIntegrate(Body pBody, double pTimeResolution, bool pIsFirstStep)
+        static void VerletIntegrate(Body body, double timeResolution, bool isFirstStep)
         {
             // Verlet integration only works with two previous positions already known,
             // so we use naive integration for the first time step
 
-            if (pIsFirstStep)
+            if (isFirstStep)
             {
-                pBody.NextPosition = pBody.CurrentPosition + 0.5 * Math.Pow(pTimeResolution, 2) * pBody.CurrentAcceleration + pTimeResolution * pBody.CurrentVelocity;
+                body.NextPosition = body.CurrentPosition + 0.5 * Math.Pow(timeResolution, 2) * body.CurrentAcceleration + timeResolution * body.CurrentVelocity;
             }
             else
             {
-                pBody.NextPosition = 2.0 * pBody.CurrentPosition - pBody.LastPosition + pBody.CurrentAcceleration * Math.Pow(pTimeResolution, 2);
+                body.NextPosition = 2.0 * body.CurrentPosition - body.LastPosition + body.CurrentAcceleration * Math.Pow(timeResolution, 2);
             }
         }
 

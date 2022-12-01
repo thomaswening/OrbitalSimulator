@@ -26,7 +26,7 @@ namespace OrbitalSimulator.Presets
         { 
             get
             {
-                if (IsMassive) return Mass;
+                if (IsMassive) return mass;
                 return 0;
             }
 

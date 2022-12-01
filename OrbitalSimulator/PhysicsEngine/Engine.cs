@@ -8,6 +8,8 @@ using OrbitalSimulator.Utilities;
 
 using PhysicsEngine;
 
+using static OrbitalSimulator.PhysicsEngine.Integrator;
+
 namespace OrbitalSimulator.PhysicsEngine
 {
     /// <summary>
@@ -27,26 +29,26 @@ namespace OrbitalSimulator.PhysicsEngine
 
         #region Public Constructors
 
-        public Engine(double pTimeSpan, double pTimeResolution)
+        public Engine(double timeSpan, double timeResolution, IntegrationType integrationType)
         {
-            if (pTimeSpan < 0) throw new ArgumentException("The time span must be greater than zero.", nameof(pTimeSpan));
+            if (timeSpan < 0) throw new ArgumentException("The time span must be greater than zero.", nameof(timeSpan));
 
-            if (pTimeSpan < pTimeResolution) throw new ArgumentException("The time span must be greater than the time resolution.", nameof(pTimeResolution));
+            if (timeSpan < timeResolution) throw new ArgumentException("The time span must be greater than the time resolution.", nameof(timeResolution));
 
-            timeSpan = pTimeSpan;
-            timeResolution = pTimeResolution;
+            this.timeSpan = timeSpan;
+            this.timeResolution = timeResolution;
         }
 
-        public Engine(double pTimeSpan, double pTimeResolution, List<Body> pBodies) : this(pTimeSpan, pTimeResolution)
+        public Engine(double timeSpan, double timeResolution, IntegrationType integrationType, List<Body> bodies) : this(timeSpan, timeResolution, integrationType)
         {
-            bodies.AddRange(pBodies);
+            this.bodies.AddRange(bodies);
         }
 
         #endregion Public Constructors
 
         #region Public Methods
 
-        public void AddBody(Body pBody) => bodies.Add(pBody);
+        public void AddBody(Body body) => bodies.Add(body);
 
         /// <summary>
         /// Runs the simulation and updates the bodies' trajectory along the way.
@@ -74,7 +76,7 @@ namespace OrbitalSimulator.PhysicsEngine
             Console.WriteLine("\nDone.");
         }
 
-        public string ToString(string pDelimiter = ",")
+        public string ToString(string delimiter = ",")
         {
             StringBuilder sb = new();
 
@@ -85,30 +87,30 @@ namespace OrbitalSimulator.PhysicsEngine
             sb.Append($"time resolution (s): {timeResolution}\n");
             sb.Append($"=> number of time samples: {timeSamples.Count}\n\n");
 
-            sb.Append($"time (s)" + pDelimiter);
+            sb.Append($"time (s)" + delimiter);
             foreach (Body body in bodies)
             {
-                sb.Append($"{body.Name} X (km)" + pDelimiter);
-                sb.Append($"{body.Name} Y (km)" + pDelimiter);
-                sb.Append($"{body.Name} Z (km)" + pDelimiter);
+                sb.Append($"{body.Name} X (km)" + delimiter);
+                sb.Append($"{body.Name} Y (km)" + delimiter);
+                sb.Append($"{body.Name} Z (km)" + delimiter);
             }
 
-            EndLine(sb, pDelimiter);
+            EndLine(sb, delimiter);
             sb.Append('\n');
 
             // Body
 
             for (int i = 0; i < timeSamples.Count; i++)
             {
-                sb.Append(timeSamples[i] + pDelimiter);
+                sb.Append(timeSamples[i] + delimiter);
                 foreach (Body body in bodies)
                 {
-                    sb.Append(body.Trajectory[i].X + pDelimiter);
-                    sb.Append(body.Trajectory[i].Y + pDelimiter);
-                    sb.Append(body.Trajectory[i].Z + pDelimiter);
+                    sb.Append(body.Trajectory[i].X + delimiter);
+                    sb.Append(body.Trajectory[i].Y + delimiter);
+                    sb.Append(body.Trajectory[i].Z + delimiter);
                 }
 
-                EndLine(sb, pDelimiter);
+                EndLine(sb, delimiter);
             }
 
             return sb.ToString();
@@ -128,58 +130,58 @@ namespace OrbitalSimulator.PhysicsEngine
 
         #region Private Methods
 
-        static void EndLine(StringBuilder pStringBuilder, string pDelimiter)
+        static void EndLine(StringBuilder stringBuilder, string delimiter)
         {
-            pStringBuilder.Remove(pStringBuilder.Length - pDelimiter.Length, pDelimiter.Length);
-            pStringBuilder.Append('\n');
+            stringBuilder.Remove(stringBuilder.Length - delimiter.Length, delimiter.Length);
+            stringBuilder.Append('\n');
         }
 
-        void ProceedOneStep(bool pIsFirstStep)
+        void ProceedOneStep(bool isFirstStep)
         {
             forceCache!.Refresh(bodies);
 
             foreach (Body body in bodies)
             {
-                if (!body.IsFixed) CalculateNextPosition(pIsFirstStep, body);
+                if (!body.IsFixed) CalculateNextPosition(isFirstStep, body);
                 body.CurrentPotentialEnergy = body.IsMassive ? EvaluatePotentialOf(body) : 0;
             }
         }
 
-        private void CalculateNextPosition(bool pIsFirstStep, Body pBody)
+        private void CalculateNextPosition(bool isFirstStep, Body body)
         {
-            if (pBody.Mass == 0.0)
+            if (body.Mass == 0.0)
             {
-                pBody.NextPosition = timeResolution * pBody.CurrentVelocity;
+                body.NextPosition = timeResolution * body.CurrentVelocity;
             }
             else
             {
-                pBody.CurrentAcceleration = EvaluateNetForceOn(pBody) / pBody.Mass;
+                body.CurrentAcceleration = EvaluateNetForceOn(body) / body.Mass;
 
-                Integrator.Integrate(IntegrationType.LeapFrog, pBody, timeResolution, pIsFirstStep);
+                Integrator.Integrate(IntegrationType.LeapFrog, body, timeResolution, isFirstStep);
             }
         }
 
-        void Update(double pSimulationTime)
+        void Update(double simulationTime)
         {
             foreach (Body body in bodies)
             {
-                body.UpdateTrajectory(pSimulationTime);
+                body.UpdateTrajectory(simulationTime);
             }
         }
 
-        Vector3 EvaluateNetForceOn(Body pBody)
+        Vector3 EvaluateNetForceOn(Body body)
         {
             Vector3 netForce = Vector3.Zero;
 
             foreach (Body body2 in bodies.Where(x => x.IsMassive))
             {
-                if (body2 != pBody) netForce += forceCache!.Fetch(pBody, body2);
+                if (body2 != body) netForce += forceCache!.Fetch(body, body2);
             }
 
             return netForce;
         }
 
-        double EvaluatePotentialOf(Body pBody)
+        double EvaluatePotentialOf(Body body)
         {
             double potential = 0;
 
@@ -187,10 +189,10 @@ namespace OrbitalSimulator.PhysicsEngine
 
             foreach (Body body2 in bodies.Where(x => x.IsMassive))
             {
-                if (body2 != pBody)
+                if (body2 != body)
                 {
-                    Vector3 cachedForce = forceCache.Fetch(pBody, body2);
-                    potential += -1 * cachedForce.Length * Vector3.Distance(body2.CurrentPosition, pBody.CurrentPosition);
+                    Vector3 cachedForce = forceCache.Fetch(body, body2);
+                    potential += -1 * cachedForce.Length * Vector3.Distance(body2.CurrentPosition, body.CurrentPosition);
                 }
             }
 

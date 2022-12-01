@@ -22,10 +22,10 @@ namespace OrbitalSimulator.PhysicsEngine
 
         #region Public Constructors
 
-        public ForceCache(int pDimension)
+        public ForceCache(int dimension)
         {
-            dimension = pDimension;
-            grid = new Vector3?[pDimension, pDimension];
+            this.dimension = dimension;
+            grid = new Vector3?[dimension, dimension];
         }
 
         #endregion Public Constructors
@@ -63,7 +63,7 @@ namespace OrbitalSimulator.PhysicsEngine
 
             return grid[i, j]!;
         }
-        void Post(int i, int j, Vector3 pValue)
+        void Post(int i, int j, Vector3 vValue)
         {
             if (i == j) throw new Exception("Diagonal elements must remain undefined.");
 
@@ -71,7 +71,7 @@ namespace OrbitalSimulator.PhysicsEngine
 
             if (j > i) throw new ArgumentException("Force cache must be upper triangular matrix.", nameof(j));
 
-            grid[i, j] = pValue;
+            grid[i, j] = vValue;
         }
 
         void Clear() => grid = new Vector3?[dimension, dimension];

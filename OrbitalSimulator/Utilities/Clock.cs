@@ -21,18 +21,18 @@ namespace OrbitalSimulator.Utilities
 
         #endregion Fields
 
-        public Clock(Func<Task> pMethodAsync)
+        public Clock(Func<Task> methodAsync)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            pMethodAsync().Wait();
+            methodAsync().Wait();
             elapsedSeconds = stopwatch.ElapsedMilliseconds / 1000.0;
             Console.WriteLine($"\nElapsed runtime >>> {ToString(elapsedSeconds)} ({elapsedSeconds} s)");
         }
 
-        public Clock(Action pMethod)
+        public Clock(Action method)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            pMethod();
+            method();
             elapsedSeconds = stopwatch.ElapsedMilliseconds / 1000.0;
             Console.WriteLine($"\nElapsed runtime >>> {ToString(elapsedSeconds)} ({elapsedSeconds} s)");
         }

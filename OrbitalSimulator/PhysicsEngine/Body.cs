@@ -25,7 +25,6 @@ namespace OrbitalSimulator.PhysicsEngine
         bool isMassive;
         double mass;
         int cacheId;
-        readonly string name;
 
         #endregion Fields
 
@@ -38,7 +37,7 @@ namespace OrbitalSimulator.PhysicsEngine
         public double Mass => mass;
         public int CacheId => cacheId;
         public List<TrajectoryPoint> Trajectory => trajectory;
-        public string Name => name;
+        public string Name { get; set; } = string.Empty;
         public Vector3 CurrentAcceleration { get; set; } = Vector3.Zero;
         public Vector3 CurrentPosition { get; set; }
         public Vector3 CurrentVelocity { get; set; }
@@ -50,19 +49,19 @@ namespace OrbitalSimulator.PhysicsEngine
 
         #region Public Constructors
 
-        public Body(double pMass, Vector3 pInitialVelocity, Vector3 pInitialPosition, bool pIsMassive, bool pIsFixed, string pName)
+        public Body(double mass, bool isMassive, bool isFixed, Vector3 initialVelocity, Vector3 initialPosition, string name)
         {
-            Initialize(pMass, pInitialVelocity, pInitialPosition, pIsMassive, pIsFixed);
+            Initialize(mass, isMassive, isFixed, initialVelocity, initialPosition);
 
-            name = pName;
+            Name = name;
         }
 
-        public Body(double pMass, Vector3 pInitialVelocity, Vector3 pInitialPosition, bool pIsMassive, bool pIsFixed)
+        public Body(double mass, bool isMassive, bool isFixed, Vector3 initialVelocity, Vector3 initialPosition)
         {
-            Initialize(pMass, pInitialVelocity, pInitialPosition, pIsMassive, pIsFixed);
+            Initialize(mass, isMassive, isFixed, initialVelocity, initialPosition);
 
             numberOfUnnamedBodies++;
-            name = "Object" + numberOfUnnamedBodies;
+            Name = "Object" + numberOfUnnamedBodies;
         }
 
         #endregion Public Constructors
@@ -70,38 +69,38 @@ namespace OrbitalSimulator.PhysicsEngine
         #region Public Methods
 
         [MemberNotNull(nameof(CurrentVelocity), nameof(CurrentPosition))]
-        public void Initialize(double pMass, Vector3 pInitialVelocity, Vector3 pInitialPosition, bool pIsMassive, bool pIsFixed)
+        public void Initialize(double mass, bool isMassive, bool isFixed, Vector3 initialVelocity, Vector3 initialPosition)
         {
-            CurrentVelocity = pInitialVelocity;
-            CurrentPosition = pInitialPosition;
+            CurrentVelocity = initialVelocity;
+            CurrentPosition = initialPosition;
 
-            mass = pMass;
-            isMassive = pIsMassive;
-            isFixed = pIsFixed;
+            this.mass = mass;
+            this.isMassive = isMassive;
+            this.isFixed = isFixed;
 
-            if (isMassive)
+            if (this.isMassive)
             {
                 cacheId = numberOfMassiveBodies;
                 numberOfMassiveBodies++;
             }
 
-            trajectory.Add(new TrajectoryPoint(0, pInitialPosition.X, pInitialPosition.Y, pInitialPosition.Z));
+            trajectory.Add(new TrajectoryPoint(0, initialPosition.X, initialPosition.Y, initialPosition.Z));
         }
 
-        public void AppendPointToTrajectory(TrajectoryPoint pPoint) => trajectory.Add(pPoint);
+        public void AppendPointToTrajectory(TrajectoryPoint point) => trajectory.Add(point);
 
         /// <summary>
         /// Evaluates the graviational force this body exerts on another body.
         /// </summary>
-        /// <param name="pBody">Body for which this body's gravitational attraction is to be evaluated</param>
+        /// <param name="body">Body for which this body's gravitational attraction is to be evaluated</param>
         /// <returns>A vector representing the gravitational force exerted by this body on pBody.</returns>
-        public Vector3 GetForceOn(Body pBody)
+        public Vector3 GetForceOn(Body body)
         {
             if (isMassive)
             {
-                double squareDistance = Vector3.DistanceSquared(CurrentPosition, pBody.CurrentPosition);
-                double magnitude = PhysicalConstants.G * mass * pBody.Mass / squareDistance;
-                Vector3 direction = Vector3.Normalize(CurrentPosition - pBody.CurrentPosition);
+                double squareDistance = Vector3.DistanceSquared(CurrentPosition, body.CurrentPosition);
+                double magnitude = PhysicalConstants.G * mass * body.Mass / squareDistance;
+                Vector3 direction = Vector3.Normalize(CurrentPosition - body.CurrentPosition);
                 return magnitude * direction;
             }
             else
@@ -110,16 +109,16 @@ namespace OrbitalSimulator.PhysicsEngine
             }
         }
 
-        public void UpdateTrajectory(double pTime)
+        public void UpdateTrajectory(double time)
         {
             if (IsFixed)
             {
-                trajectory.Add(new TrajectoryPoint(pTime, CurrentPosition));
+                trajectory.Add(new TrajectoryPoint(time, CurrentPosition));
             }
             else
             {
                 CurrentPosition = NextPosition;
-                trajectory.Add(new TrajectoryPoint(pTime, CurrentPosition));
+                trajectory.Add(new TrajectoryPoint(time, CurrentPosition));
             }
         }
 

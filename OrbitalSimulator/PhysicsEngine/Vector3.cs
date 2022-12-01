@@ -57,6 +57,13 @@ namespace OrbitalSimulator.PhysicsEngine
             Components = new double[3] { x, y, z };
         }
 
+        public Vector3(double[] components)
+        {
+            if (components.Length != 3) throw new ArgumentException("Must have length == 3.", nameof(components));
+
+            Components = components;
+        }
+
         #endregion Public Constructors
 
         #region Public Methods
