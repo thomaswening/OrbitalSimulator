@@ -17,23 +17,8 @@ namespace PhysicsEngine
         static readonly string dataPath = @"E:\Users\thoma\Desktop";
         static void Main(string[] args)
         {
-            SavePreset(CreatePresetFromEngine(InitializeExample(Example.SolarSystem), "SolarSystem"), Path.Combine(dataPath, "SolarSystem"));
-            SavePreset(CreatePresetFromEngine(InitializeExample(Example.EarthMoonIss), "EarthMoonIss"), Path.Combine(dataPath, "EarthMoonIss"));
-
-            Engine? engine = InitializePreset(Path.Combine(dataPath, "SolarSystem.json"));
-            engine?.Run();
-            engine?.PrintToFile(Path.Combine(dataPath, "SolarSystem.dat"));
-
-            engine = InitializePreset(Path.Combine(dataPath, "EarthMoonIss.json"));
-            engine?.Run();
-            engine?.PrintToFile(Path.Combine(dataPath, "EarthMoonIss.dat"));
-
-            //Engine engine = InitializeExample(Example.EarthMoonIss);
-            //engine.Run();
-            //engine.PrintToFile(Path.Combine(dataPath, "EarthMoonIss.dat"));
-
-            //if (args.Length == 1) InitializeEngine(args[0]);
-            //else Console.WriteLine("Invalid input.");
+            if (args.Length == 1) InitializeEngine(Path.GetFullPath(args[0]));
+            else Console.WriteLine("Invalid input.");
         }
 
         static void InitializeEngine(string presetName)
@@ -157,8 +142,8 @@ namespace PhysicsEngine
             {
                 case Example.EarthMoonIss:
                     AddEarthMoonIssBodies(simulationBodies);
-                    timeSpan = 1 * 365 * 24 * Math.Pow(60, 2);  // 1 month
-                    timeResolution = 12 * Math.Pow(60, 2);      // 12 hours
+                    timeSpan = 24 * Math.Pow(60, 2);  // 1 day
+                    timeResolution = 60;      // 1 minute
                     break;
 
                 case Example.SolarSystem:
@@ -268,6 +253,9 @@ namespace PhysicsEngine
 
         private static void AddEarthMoonIssBodies(List<Body> simulationBodies)
         {
+            double radiusEarth = 6.3781e6;
+            double apogeeIss = 422e3;
+
             Body earth = new(
                     mass: 5.972e24,
                     initialVelocity: Vector3.Zero,
@@ -290,8 +278,8 @@ namespace PhysicsEngine
 
             Body iss = new(
                     mass: 444.615e3,
-                    initialVelocity: new Vector3(0, 7.66e3, 0),
-                    initialPosition: new Vector3(6.371e6 + 412e3, 0, 0),
+                    initialVelocity: new Vector3(0, 7.6e3, 0),
+                    initialPosition: new Vector3(radiusEarth + apogeeIss, 0, 0),
                     isMassive: false,
                     isFixed: false,
                     name: "ISS"
