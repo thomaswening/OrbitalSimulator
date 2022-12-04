@@ -33,7 +33,7 @@ namespace PhysicsEngine
             {
                 Config? config = JsonSerializer.Deserialize<Config>(configPath);
 
-                if (config == null) throw new Exception("The file config.json could not be deserialized. Recreating with default paths and reloading.");
+                if (config is null) throw new Exception("The file config.json could not be deserialized. Recreating with default paths and reloading.");
 
                 outputPath = Path.GetFullPath(config.OutputPath);
                 plottingPath = Path.GetFullPath(config.PlottingPath);

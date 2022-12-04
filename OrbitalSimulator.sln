@@ -5,7 +5,7 @@ VisualStudioVersion = 17.3.32804.467
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrbitalSimulator", "OrbitalSimulator\OrbitalSimulator.csproj", "{119285B2-0FB0-4736-ABEF-E0645C4A2081}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{6DE646C4-EC59-45B7-B094-DA5EE8C8420A}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "OrbitalSimulatorSetup", "OrbitalSimulatorSetup\OrbitalSimulatorSetup.vdproj", "{FE241342-29C0-455C-9385-A51D0FA2A83A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,8 +17,8 @@ Global
 		{119285B2-0FB0-4736-ABEF-E0645C4A2081}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{119285B2-0FB0-4736-ABEF-E0645C4A2081}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{119285B2-0FB0-4736-ABEF-E0645C4A2081}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6DE646C4-EC59-45B7-B094-DA5EE8C8420A}.Debug|Any CPU.ActiveCfg = Debug
-		{6DE646C4-EC59-45B7-B094-DA5EE8C8420A}.Release|Any CPU.ActiveCfg = Release
+		{FE241342-29C0-455C-9385-A51D0FA2A83A}.Debug|Any CPU.ActiveCfg = Debug
+		{FE241342-29C0-455C-9385-A51D0FA2A83A}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
