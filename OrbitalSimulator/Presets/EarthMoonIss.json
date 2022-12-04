@@ -1,0 +1,56 @@
+{
+  "Name": "EarthMoonIss",
+  "IntegrationType": "leapfrog",
+  "TimeSpan": 86400,
+  "TimeResolution": 60,
+  "Bodies": [
+    {
+      "Name": "Earth",
+      "IsFixed": true,
+      "IsMassive": true,
+      "Mass": 5.972E+24,
+      "InitialPosition": [
+        0,
+        0,
+        0
+      ],
+      "InitialVelocity": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "Name": "Moon",
+      "IsFixed": false,
+      "IsMassive": true,
+      "Mass": 7.348E+22,
+      "InitialPosition": [
+        385000000,
+        0,
+        0
+      ],
+      "InitialVelocity": [
+        0,
+        1022,
+        0
+      ]
+    },
+    {
+      "Name": "ISS",
+      "IsFixed": false,
+      "IsMassive": false,
+      "Mass": 444615,
+      "InitialPosition": [
+        6800100,
+        0,
+        0
+      ],
+      "InitialVelocity": [
+        0,
+        7600,
+        0
+      ]
+    }
+  ]
+}

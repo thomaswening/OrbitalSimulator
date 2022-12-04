@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using OrbitalSimulator.Models;
 using OrbitalSimulator.Utilities;
 
 using PhysicsEngine;
@@ -17,11 +18,16 @@ namespace OrbitalSimulator.PhysicsEngine
     /// </summary>
     internal class Engine
     {
+
         #region Fields
 
         readonly List<Body> bodies = new();
         readonly List<double> timeSamples = new() { 0 };
         ForceCache? forceCache;
+
+        #endregion Fields
+
+        #region Properties
 
         public double TimeSpan { get; set; }
         public double TimeResolution { get; set; }
@@ -29,7 +35,7 @@ namespace OrbitalSimulator.PhysicsEngine
 
         public IntegrationType IntegrationType { get; set; }
 
-        #endregion Fields
+        #endregion Properties
 
         #region Public Constructors
 
@@ -53,8 +59,13 @@ namespace OrbitalSimulator.PhysicsEngine
 
         #region Public Methods
 
-        public void AddBody(Body body) => bodies.Add(body);
+        public static void Initialize(string presetName)
+        {
+            Engine? engine = SimulationPreset.Initialize(presetName);
+            engine?.Run();
+        }
 
+        public void AddBody(Body body) => bodies.Add(body);
         /// <summary>
         /// Runs the simulation and updates the bodies' trajectory along the way.
         /// </summary>
@@ -205,5 +216,6 @@ namespace OrbitalSimulator.PhysicsEngine
         }
 
         #endregion Private Methods
+
     }
 }

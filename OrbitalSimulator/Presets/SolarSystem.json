@@ -1,0 +1,152 @@
+{
+  "Name": "SolarSystem",
+  "IntegrationType": "leapfrog",
+  "TimeSpan": 31536000,
+  "TimeResolution": 86400,
+  "Bodies": [
+    {
+      "Name": "Sun",
+      "IsFixed": true,
+      "IsMassive": true,
+      "Mass": 1.989E+30,
+      "InitialPosition": [
+        0,
+        0,
+        0
+      ],
+      "InitialVelocity": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "Name": "Mercury",
+      "IsFixed": false,
+      "IsMassive": true,
+      "Mass": 3.285E+23,
+      "InitialPosition": [
+        46000000000,
+        0,
+        0
+      ],
+      "InitialVelocity": [
+        0,
+        58980,
+        0
+      ]
+    },
+    {
+      "Name": "Venus",
+      "IsFixed": false,
+      "IsMassive": true,
+      "Mass": 4.867E+24,
+      "InitialPosition": [
+        107500000000,
+        0,
+        0
+      ],
+      "InitialVelocity": [
+        0,
+        35260,
+        0
+      ]
+    },
+    {
+      "Name": "Earth",
+      "IsFixed": false,
+      "IsMassive": true,
+      "Mass": 5.972E+24,
+      "InitialPosition": [
+        147100000000,
+        0,
+        0
+      ],
+      "InitialVelocity": [
+        0,
+        30290,
+        0
+      ]
+    },
+    {
+      "Name": "Mars",
+      "IsFixed": false,
+      "IsMassive": true,
+      "Mass": 6.39E+23,
+      "InitialPosition": [
+        206600000000,
+        0,
+        0
+      ],
+      "InitialVelocity": [
+        0,
+        26500,
+        0
+      ]
+    },
+    {
+      "Name": "Jupiter",
+      "IsFixed": false,
+      "IsMassive": true,
+      "Mass": 1.898E+27,
+      "InitialPosition": [
+        740700000000,
+        0,
+        0
+      ],
+      "InitialVelocity": [
+        0,
+        13720,
+        0
+      ]
+    },
+    {
+      "Name": "Saturn",
+      "IsFixed": false,
+      "IsMassive": true,
+      "Mass": 5.683E+27,
+      "InitialPosition": [
+        1349000000000,
+        0,
+        0
+      ],
+      "InitialVelocity": [
+        0,
+        10180,
+        0
+      ]
+    },
+    {
+      "Name": "Uranus",
+      "IsFixed": false,
+      "IsMassive": true,
+      "Mass": 8.681E+25,
+      "InitialPosition": [
+        2736000000000,
+        0,
+        0
+      ],
+      "InitialVelocity": [
+        0,
+        7110,
+        0
+      ]
+    },
+    {
+      "Name": "Neptune",
+      "IsFixed": false,
+      "IsMassive": true,
+      "Mass": 1.024E+26,
+      "InitialPosition": [
+        4459000000000,
+        0,
+        0
+      ],
+      "InitialVelocity": [
+        0,
+        5500,
+        0
+      ]
+    }
+  ]
+}
